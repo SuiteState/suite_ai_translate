@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!--
+        Composer extension.
+
+        OFF: small "🌐 AI Translate" link right-aligned above the composer.
+        ON:  preview bar:
+               [🌐] [lang▾] [🔄] [preview] [✈ send] [✕]
+
+          - [🔄] — manually triggers translation of the composer input.
+                   No auto-translate: saves API calls and avoids timing
+                   out while the user is still typing/thinking.
+          - [✈]  — swaps preview into input + native send + mark_last.
+          - [✕]  — closes translation mode.
+    -->
+    <t t-name="mail.Composer" t-inherit="mail.Composer" t-inherit-mode="extension">
+
+        <xpath expr="//div[hasclass('o-mail-Composer')]" position="before">
+
+            <!-- OFF state -->
+            <div t-if="!satCompose.enabled"
+                 class="o-mail-sat-toggle-row d-flex justify-content-end px-2">
+                <button type="button"
+                        class="btn btn-link btn-sm text-muted o-mail-sat-toggle p-1"
+                        t-on-click="() => this.satToggleTranslateMode()"
+                        title="Translate before sending">
+                    <i class="fa fa-language me-1"/>
+                    <span class="small">AI Translate</span>
+                </button>
+            </div>
+
+            <!-- ON state -->
+            <div t-if="satCompose.enabled"
+                 class="o-mail-sat-composer-bar mx-2 mb-1 p-2 rounded-3">
+
+                <div class="d-flex align-items-start gap-2">
+                    <i class="fa fa-language text-muted mt-1 flex-shrink-0"/>
+
+                    <!--
+                        Target-language picker: Odoo native SelectMenu.
+                        Default slot turns the toggler into a <button>
+                        showing the full bilingual language name. The
+                        dropdown has a built-in search box covering
+                        ~108 languages (searchableLabel packs english +
+                        native + ISO code into choice.label).
+                    -->
+                    <SelectMenu choices="satComposerSelectChoices"
+                                value="satCompose.target"
+                                onSelect.bind="satSelectTarget"
+                                required="true"
+                                class="'o-mail-sat-lang-select flex-shrink-0'"
+                                menuClass="'o-mail-sat-lang-menu'">
+                        <span class="o-mail-sat-lang-toggler-content">
+                            <t t-esc="satComposerLabel(satCompose.target)"/>
+                        </span>
+                    </SelectMenu>
+
+                    <!--
+                        Manual translate button. Disabled when the input
+                        is empty or a translation is already in flight.
+                    -->
+                    <button type="button"
+                            class="btn btn-sm o-mail-sat-translate flex-shrink-0"
+                            t-on-click="() => this.satManualTranslate()"
+                            t-att-disabled="(!satOriginalText or satCompose.loading) ? 'disabled' : ''"
+                            title="Translate">
+                        <i t-if="satCompose.loading" class="fa fa-spinner fa-spin"/>
+                        <i t-else="" class="fa fa-refresh"/>
+                    </button>
+
+                    <textarea class="form-control form-control-sm o-mail-sat-composer-preview flex-grow-1"
+                              t-att-dir="satIsRtl(satCompose.target) ? 'rtl' : 'ltr'"
+                              t-att-value="satCompose.preview"
+                              t-att-placeholder="satCompose.loading ? 'Translating...' : 'Click the translate button to translate your input'"
+                              t-on-input="(ev) => this.satOnPreviewInput(ev)"
+                              rows="1"/>
+
+                    <!--
+                        Send-translation button: paper-plane-o (same icon as
+                        Odoo's native send button). We invert the color scheme
+                        — native is purple bg + white plane, ours is
+                        transparent/white bg + purple plane — so the two
+                        buttons are visually distinct while using the
+                        same universally-recognized "send" icon.
+                        Behavior: swap preview into input + native send
+                        + mark_last archival, all in one click.
+                    -->
+                    <button type="button"
+                            class="btn btn-link rounded-circle p-0 o-mail-sat-use flex-shrink-0"
+                            t-on-click="() => this.satUse()"
+                            t-att-disabled="(!satCompose.preview or satCompose.loading or satCompose.sending) ? 'disabled' : ''"
+                            title="Send translation">
+                        <i t-if="satCompose.sending" class="fa fa-spinner fa-spin"/>
+                        <i t-else="" class="fa fa-fw fa-lg fa-paper-plane-o"/>
+                    </button>
+
+                    <!-- Close: exit translation mode -->
+                    <button type="button"
+                            class="btn btn-sm btn-link text-muted p-1 flex-shrink-0"
+                            t-on-click="() => this.satClose()"
+                            title="Close translation mode">
+                        <i class="fa fa-times"/>
+                    </button>
+                </div>
+
+                <div t-if="satCompose.error"
+                     class="mt-1 small text-danger">
+                    <i class="fa fa-exclamation-triangle me-1"/>
+                    <t t-esc="satCompose.error"/>
+                </div>
+            </div>
+
+        </xpath>
+
+    </t>
+
+</templates>

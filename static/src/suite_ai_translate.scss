@@ -1,0 +1,343 @@
+/*
+ * Discuss AI Translate — stylesheet
+ *
+ * Visual strategy — two distinct roles, two distinct styles:
+ *
+ *   1. Composer preview bar (.o-mail-sat-composer-bar)
+ *      Role: INPUT/ACTION zone above the composer. Hosts language
+ *      select, translate button, textarea, send button, close button —
+ *      a cluster of heterogeneous controls that must read as one unit.
+ *      Style: soft-pill container (light background, rounded, faint
+ *      border) — mirrors Odoo's native composer pill. Internal
+ *      textarea and select are BORDER-LESS / TRANSPARENT so they
+ *      melt into the pill; focus is shown via :focus-within on the
+ *      pill itself (unified focus ring).
+ *
+ *   2. In-message panels (.o-mail-sat-panel, .o-mail-sat-original)
+ *      Role: CONTENT annotations attached to a message — the
+ *      translation of an incoming message, or the archived original
+ *      of a sent message. Subordinate to the message bubble above.
+ *      Style: leading accent bar (brand purple) with padding, no
+ *      border, no background — the "quoted/annotated" visual idiom.
+ *
+ * Both in-message panels share the same accent-bar rules so they
+ * read as siblings of the same "message annotation" family.
+ */
+
+// =========================================================================
+// 1. Composer preview bar — soft-pill container
+// =========================================================================
+//
+// Mirrors Odoo's native composer pill: light tinted background +
+// rounded corners + hair-line border. Internal controls (textarea,
+// select, buttons) keep their Bootstrap defaults so the cluster
+// reads as a coherent input group.
+
+.o-mail-sat-composer-bar {
+    background-color: var(--o-view-background-color, #f8f9fa);
+    border: 1px solid var(--o-border-color, #dee2e6);
+
+    // Textarea melts into the pill — no independent border, no
+    // background, no focus ring. The outer pill is the only frame.
+    .o-mail-sat-composer-preview {
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+        color: var(--o-muted-text-color, #6c757d);
+
+        // Auto-grow textarea: 1 row default, up to 5, then scroll.
+        field-sizing: content;
+        min-height: calc(1.5em + 0.5rem);
+        max-height: calc(1.5em * 5 + 0.5rem);
+        resize: none;
+        overflow-y: auto;
+
+        &:focus {
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            outline: none;
+        }
+
+        &::placeholder {
+            color: var(--o-muted-text-color, #adb5bd);
+            font-style: italic;
+        }
+    }
+}
+
+// ---- Manual translate button (🔄/🌐 between lang toggler and preview) ----
+//
+// Next to the language toggler. Low-visual-weight icon-only button:
+// hollow, purple icon, transparent bg. Becomes dim when disabled
+// (empty input or translation in flight).
+.o-mail-sat-translate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: calc(1.5em + 0.5rem); // match form-control-sm height
+    padding: 0;
+    color: var(--o-brand-primary, #71639e);
+    background-color: transparent;
+    border: 1px solid var(--o-border-color, #dee2e6);
+
+    &:hover:not(:disabled) {
+        background-color: rgba(113, 99, 158, 0.08);
+        border-color: var(--o-border-color, #dee2e6);
+    }
+
+    &:disabled {
+        color: var(--o-muted-text-color, #adb5bd);
+        opacity: 0.6;
+    }
+
+    i.fa {
+        font-size: 0.9rem;
+    }
+}
+
+// ---- Send button (white bg + purple plane, inverted from native) --------
+//
+// Odoo's native send button is purple bg + white plane (composer.scss:85).
+// Ours inverts: transparent bg + purple plane, so the two buttons read as
+// distinct at a glance (user sees "translated send" vs "native send") while
+// still using the same brand color. Disabled state matches native — gray +
+// reduced opacity — via Bootstrap's btn-link default.
+.o-mail-sat-use {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--o-brand-primary, #71639e);
+    background-color: transparent;
+    border: 1px solid var(--o-brand-primary, #71639e);
+
+    &:hover:not(:disabled) {
+        background-color: rgba(113, 99, 158, 0.1);
+        color: var(--o-brand-primary, #71639e);
+        border-color: var(--o-brand-primary, #71639e);
+    }
+
+    &:disabled {
+        color: var(--o-muted-text-color, #adb5bd);
+        border-color: var(--o-border-color, #dee2e6);
+        opacity: 0.5;
+    }
+
+    i.fa {
+        font-size: 0.9rem;
+    }
+}
+
+// =========================================================================
+// 1a. Language picker — SelectMenu toggler override
+// =========================================================================
+//
+// SelectMenu renders the toggler as:
+//   <div class="o_select_menu">
+//     <button class="o_select_menu_toggler d-flex border btn btn-light w-100">
+//       <span class="o_select_menu_toggler_slot text-start text-truncate">
+//         ...our default slot content (the ISO tag)...
+//       </span>
+//       <span class="o_select_menu_caret" />
+//     </button>
+//   </div>
+//
+// The defaults (w-100 + btn-light) make the button stretch to fill
+// its flex parent — that's why the original <select> "went full
+// width" earlier. We override:
+//   1. kill w-100 / let width follow content
+//   2. make the button compact (48–60px) to hold just the ISO code
+//   3. lower visual weight (no bg, hair-line border) so it reads as
+//      a small meta control, not a primary action button
+
+.o-mail-sat-lang-select {
+    // Let the toggler follow content width but cap it so a very long
+    // bilingual name (e.g. "Chinese (Simplified) / 中文（简体）")
+    // doesn't push the controls row past the message column. If the
+    // name exceeds the cap, CSS truncates with an ellipsis — the full
+    // name is always fully visible in the expanded dropdown anyway.
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 80px;
+    max-width: 260px;
+
+    .o_select_menu_toggler {
+        // Override the native "w-100 border btn btn-light" bundle.
+        width: 100%;
+        padding: 0.125rem 0.5rem;
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 1.4;
+        color: var(--o-main-text-color, #374151);
+        background-color: transparent;
+        border: 1px solid var(--o-border-color, #dee2e6);
+
+        &:hover,
+        &:focus {
+            background-color: rgba(0, 0, 0, 0.04);
+            border-color: var(--o-border-color, #dee2e6);
+            box-shadow: none;
+        }
+    }
+
+    .o_select_menu_toggler_slot {
+        // Truncate long bilingual names with an ellipsis.
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
+}
+
+// Dropdown menu — width decoupled from the toggler so full bilingual
+// names ("Chinese (Simplified) / 中文（简体）") fit one line without
+// wrapping.
+//
+// Desktop: fixed 320–480px range.
+// Mobile (< 576px): cap at 90vw so the menu never overflows the screen.
+//
+// We use a media query rather than CSS min() because Sass compilers
+// (both libsass and dart-sass in strict mode) try to evaluate min()
+// as their own built-in and reject mixed px+vw units, failing the
+// whole bundle compile.
+.o-mail-sat-lang-menu {
+    width: auto;
+    min-width: 320px;
+    max-width: 480px;
+    max-height: 60vh;
+    overflow-y: auto;
+
+    @media (max-width: 575.98px) {
+        max-width: 90vw;
+    }
+}
+
+// =========================================================================
+// 2. In-message panels — accent-bar annotation style
+// =========================================================================
+//
+// Inserted after .o-mail-Message-contentContainer (the flex row
+// holding the bubble). Sit in .w-100.o-min-width-0 block flow as
+// a sibling of the bubble row.
+//
+// Visual-ownership strategy: asymmetric margin so the block clearly
+// belongs to the message ABOVE, not the one below.
+//   - margin-top: 0       (hug the bubble above, overrides mt-1)
+//   - margin-bottom: 1rem (push next message's header away)
+
+.o-mail-sat-panel,
+.o-mail-sat-original {
+    margin-top: 0 !important;
+    margin-bottom: 1rem !important;
+    border-left: 3px solid var(--o-brand-primary, #875A7B);
+    padding-left: 0.6rem !important;
+}
+
+// In ChatWindow, self-authored messages have a right-aligned bubble
+// (contentContainer uses flex-row-reverse). Our panels live in
+// normal block flow — they start from the LEFT edge while the
+// bubble is on the RIGHT. Without correction the left accent bar
+// reads as a prefix of the NEXT incoming message rather than a
+// note under the bubble above it.
+//
+// Mirror the bubble: push to right, flip accent bar to right side,
+// cap width so it hugs the bubble's region.
+.o-mail-ChatWindow .o-mail-Message.o-selfAuthored {
+    .o-mail-sat-panel,
+    .o-mail-sat-original {
+        margin-left: auto;
+        border-left: none;
+        border-right: 3px solid var(--o-brand-primary, #875A7B);
+        padding-left: 0 !important;
+        padding-right: 0.6rem !important;
+        max-width: 85%;
+        text-align: start;
+    }
+}
+
+// Incoming translation text
+.o-mail-sat-panel {
+    .o-mail-sat-panel-text {
+        white-space: pre-wrap;
+        word-break: break-word;
+        padding-top: 0.25rem;
+    }
+}
+
+// Outgoing "View original" body
+.o-mail-sat-original {
+    .o-mail-sat-original-body {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background-color: transparent;
+
+        // Defensive: if body renders empty for any reason, hide it
+        // so the parent's accent bar doesn't extend into a long
+        // trailing line.
+        &:empty {
+            display: none;
+        }
+
+        // Cap excessive heights to prevent runaway visual extents.
+        max-height: 400px;
+        overflow-y: auto;
+    }
+}
+
+// ---- RTL (Arabic/Persian/Urdu) — flip the accent bar --------------------
+
+// RTL outside ChatWindow (Discuss main / Chatter): bubble is on the
+// right of the column, so the accent bar moves to the right.
+[dir="rtl"] .o-mail-sat-panel,
+[dir="rtl"] .o-mail-sat-original {
+    border-left: none;
+    border-right: 3px solid var(--o-brand-primary, #875A7B);
+    padding-left: 0 !important;
+    padding-right: 0.6rem !important;
+}
+
+// RTL inside ChatWindow self-authored: bubble flips back to the
+// left (RTL + flex-row-reverse cancel out). Restore the left
+// accent bar, overriding both the ChatWindow rule above and the
+// generic RTL rule.
+[dir="rtl"] .o-mail-ChatWindow .o-mail-Message.o-selfAuthored {
+    .o-mail-sat-panel,
+    .o-mail-sat-original {
+        border-left: 3px solid var(--o-brand-primary, #875A7B) !important;
+        border-right: none !important;
+        padding-left: 0.6rem !important;
+        padding-right: 0 !important;
+        margin-left: 0;
+    }
+}
+
+// =========================================================================
+// 3. OFF-state toggle link ("🌐 AI Translate" above composer)
+// =========================================================================
+
+.o-mail-sat-toggle-row {
+    padding-top: 2px;
+    padding-bottom: 0;
+}
+
+.o-mail-sat-toggle {
+    opacity: 0.6;
+    transition: opacity 0.15s ease, color 0.15s ease;
+
+    &:hover {
+        opacity: 1;
+        color: var(--o-brand-odoo, #875A7B) !important;
+    }
+}
+
+// =========================================================================
+// 4. RTL text alignment for preview/translation content
+// =========================================================================
+
+[dir="rtl"].o-mail-sat-panel-text,
+[dir="rtl"].o-mail-sat-composer-preview {
+    text-align: right;
+}

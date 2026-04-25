@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!--
+        Inherit the Message template to append:
+        1. A "View original" toggle for outgoing messages that were
+           sent via the Composer's ✈ translation-send button (sat_original_body set).
+        2. An inline translation panel opened via the three-dot
+           "AI Translate" action.
+
+        Insertion point: after .o-mail-Message-contentContainer.
+        This puts our panels as a sibling of the flex row that holds
+        the bubble, inside .w-100.o-min-width-0 (the message's main
+        column). Visually: the bubble row ends, then our panel appears
+        directly below, then MessageReactions and after-reactions slot
+        follow.
+
+        Why not inside .o-mail-Message-content: that container is
+        inside the .d-flex contentContainer row, so our panel becomes
+        a flex item and its vertical position is ambiguous relative
+        to the next message. Moving out to contentContainer's sibling
+        makes the block clearly belong to the current message.
+
+        Odoo itself uses the same pattern (after //*[@name='after-reactions'])
+        in enterprise/mail/.../message_patch.xml, proving this is a
+        stable insertion approach.
+    -->
+    <t t-name="mail.Message" t-inherit="mail.Message" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o-mail-Message-contentContainer')]" position="after">
+
+            <!-- "View original" for messages sent through composer translation -->
+            <div t-if="satHasOriginal"
+                 class="o-mail-sat-original mt-1 small">
+                <button type="button"
+                        class="btn btn-link btn-sm p-0 text-muted"
+                        t-on-click="() => this.satToggleOriginal()">
+                    <i class="fa fa-language me-1"/>
+                    <span t-if="!satOriginal.shown">View original<t t-if="satOriginalTargetLabel"><t t-esc="' (sent as ' + satOriginalTargetLabel + ')'"/></t></span>
+                    <span t-else="">Hide original</span>
+                </button>
+                <div t-if="satOriginal.shown"
+                     class="o-mail-sat-original-body mt-1 p-2 border-start border-2 ps-2 text-muted"
+                     t-esc="satOriginalBodyText"/>
+            </div>
+
+            <!-- Incoming translation panel -->
+            <div t-if="satTranslate.open"
+                 class="o-mail-sat-panel mt-1">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="fa fa-language text-muted"/>
+
+                    <!--
+                        Language picker: Odoo native SelectMenu.
+                        Providing a default slot turns the toggler into
+                        a <button> (vs the default <input>). We fill
+                        that button with our compact ISO tag (EN/CN/AR/..)
+                        + a caret icon, matching the composer preview.
+                        The dropdown itself shows a built-in search box
+                        + scrolled list of all 100+ languages.
+                        searchableLabel (in languages.js) packs english
+                        + native + ISO code into each choice.label so
+                        typing any of the three hits the right language.
+                    -->
+                    <SelectMenu choices="satLanguageSelectChoices"
+                                value="satTranslate.lang"
+                                onSelect.bind="satSelectLanguage"
+                                required="true"
+                                class="'o-mail-sat-lang-select'"
+                                menuClass="'o-mail-sat-lang-menu'">
+                        <span class="o-mail-sat-lang-toggler-content">
+                            <t t-esc="satLabelFor(satTranslate.lang)"/>
+                        </span>
+                    </SelectMenu>
+
+                    <span t-if="satTranslate.loading"
+                          class="text-muted small ms-1">
+                        <i class="fa fa-spinner fa-spin me-1"/>Translating...
+                    </span>
+                    <button type="button"
+                            class="btn btn-link btn-sm p-0 text-muted"
+                            t-on-click="() => this.satCloseTranslatePanel()"
+                            title="Close">
+                        <i class="fa fa-times"/>
+                    </button>
+                </div>
+
+                <div t-if="satTranslate.error"
+                     class="alert alert-warning py-1 px-2 mb-0 small"
+                     role="alert">
+                    <i class="fa fa-exclamation-triangle me-1"/>
+                    <t t-esc="satTranslate.error"/>
+                </div>
+
+                <div t-elif="satTranslate.text"
+                     class="o-mail-sat-panel-text"
+                     t-att-dir="satIsRtl(satTranslate.lang) ? 'rtl' : 'ltr'">
+                    <t t-esc="satTranslate.text"/>
+                </div>
+
+                <div t-elif="!satTranslate.loading"
+                     class="text-muted small fst-italic">
+                    Please select a language from the dropdown to translate.
+                </div>
+            </div>
+
+        </xpath>
+    </t>
+
+</templates>
