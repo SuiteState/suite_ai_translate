@@ -16,12 +16,12 @@
                 Translation operates in two directions:
             </p>
             <ul>
-                <li><strong>Incoming</strong> — translate received messages on demand for reading.</li>
-                <li><strong>Outgoing</strong> — translate composer drafts before sending; the original draft text is archived on the sent message.</li>
+                <li><strong>Incoming</strong> &mdash; translate received messages on demand for reading.</li>
+                <li><strong>Outgoing</strong> &mdash; translate composer drafts before sending; the original draft text is archived on the sent message.</li>
             </ul>
             <p style="text-align:justify;">
                 Translation is performed by the AI provider configured in Odoo's
-                native <code>ai</code> module — currently OpenAI or Google Gemini.
+                native <code>ai</code> module &mdash; currently OpenAI or Google Gemini.
                 The module does not require its own API key or SaaS account.
             </p>
         </div>
@@ -128,7 +128,7 @@
             <h4>Recipient of transmitted data</h4>
             <p style="text-align:justify;">
                 Whichever provider the administrator has configured in Odoo's
-                AI settings — OpenAI (ChatGPT) and/or Google Gemini.
+                AI settings &mdash; OpenAI (ChatGPT) and/or Google Gemini.
                 Transmitted text is subject to that provider's terms of
                 service, data retention policies, and applicable privacy law:
             </p>
@@ -140,7 +140,7 @@
             <p style="text-align:justify;">
                 The feature is disabled by default. An administrator must
                 explicitly enable <em>Enable Discuss AI Translate</em> in
-                Settings → General Settings → AI → Discuss AI Translate
+                Settings &rarr; General Settings &rarr; AI &rarr; Discuss AI Translate
                 before any text is transmitted. Translation RPC endpoints
                 refuse to call any AI provider until this opt-in is granted.
             </p>
@@ -173,7 +173,7 @@
                 <li>WhatsApp conversations <small>(when Odoo's native <code>whatsapp</code> module is set up)</small></li>
                 <li>Email composer (<code>mail.compose.message</code>)</li>
                 <li>Chatter on any business record (CRM, Sales, Helpdesk, Tasks, any model with <code>mail.thread</code>)</li>
-                <li>Live chat conversations — agent side, accessed via the Discuss channel view</li>
+                <li>Live chat conversations &mdash; agent side, accessed via the Discuss channel view</li>
             </ul>
         </div>
         <div class="oe_span6">
@@ -206,14 +206,14 @@
                 The default build supports the AI providers integrated in
                 Odoo's native <code>ai</code> module: OpenAI and Google Gemini.
                 The module's provider layer can be extended to other AI
-                providers — for example, when the default providers are not
+                providers &mdash; for example, when the default providers are not
                 reachable from a given region, when a domain-specialized model
                 is preferred for a specific language pair, or when a different
                 provider is required for organizational reasons.
             </p>
             <p style="text-align:justify;">
                 For inquiries about extending to a different AI provider,
-                contact <code>Hello@suitestate.com</code>.
+                contact <code>hello@suitestate.com</code>.
             </p>
         </div>
     </div>
@@ -225,13 +225,13 @@
             <h2 class="oe_slogan">Requirements</h2>
             <ul>
                 <li><strong>Odoo 19 Enterprise.</strong> Depends on the <code>ai</code> and <code>ai_app</code> modules, which are part of the Enterprise edition.</li>
-                <li><strong>An OpenAI or Google Gemini API key</strong> configured in Settings → General Settings → AI. The module does not bundle or manage its own keys.</li>
+                <li><strong>An OpenAI or Google Gemini API key</strong> configured in Settings &rarr; General Settings &rarr; AI. The module does not bundle or manage its own keys.</li>
                 <li><strong>Network egress</strong> from the Odoo server to <code>api.openai.com</code> and/or <code>generativelanguage.googleapis.com</code>.</li>
                 <li>
                     <strong>For WhatsApp translation (optional):</strong> Odoo's native
                     <code>whatsapp</code> module installed and configured with a valid
                     Meta WhatsApp Business Account. This module does not integrate with
-                    the WhatsApp Business API itself — it only adds translation
+                    the WhatsApp Business API itself &mdash; it only adds translation
                     capability to WhatsApp conversations already handled by Odoo's
                     native module. Setting up WhatsApp in Odoo (Meta Business Account,
                     phone number verification, template approval) is handled by the
@@ -267,11 +267,11 @@
     <div class="oe_row oe_spaced">
         <div class="oe_span12">
             <h2 class="oe_slogan">Configuration</h2>
-            <p>All configuration is in Settings → General Settings → AI → Discuss AI Translate:</p>
+            <p>All configuration is in Settings &rarr; General Settings &rarr; AI &rarr; Discuss AI Translate:</p>
             <ul>
-                <li><strong>Enable Discuss AI Translate</strong> — opt-in switch (off by default).</li>
-                <li><strong>Translation Model</strong> — primary model used for every translation request.</li>
-                <li><strong>Failover Model</strong> — automatic fallback when the primary provider fails.</li>
+                <li><strong>Enable Discuss AI Translate</strong> &mdash; opt-in switch (off by default).</li>
+                <li><strong>Translation Model</strong> &mdash; primary model used for every translation request.</li>
+                <li><strong>Failover Model</strong> &mdash; automatic fallback when the primary provider fails.</li>
             </ul>
             <p>
                 Two system parameters are available for advanced tuning:
@@ -297,7 +297,7 @@
                 Maintained by <strong>SuiteState</strong>. For questions, bug
                 reports, or feature requests, visit
                 <a href="https://suitestate.com">suitestate.com</a> or contact
-                <code>Hello@suitestate.com</code>.
+                <code>hello@suitestate.com</code>.
             </p>
         </div>
     </div>
