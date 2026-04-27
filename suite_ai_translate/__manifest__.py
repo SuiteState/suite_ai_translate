@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Discuss AI Translate',
-    'version': '19.0.1.2.1',
+    'version': '19.0.1.2.2',
     'category': 'Productivity/Discuss',
     'summary': 'AI translation for incoming and outgoing messages in Discuss, WhatsApp, and chatter.',
     'description': """
