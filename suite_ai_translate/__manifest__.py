@@ -56,10 +56,10 @@ chat surfaces, privacy details, and configuration options.
         ],
     },
     'images': [
-        'static/description/suite_ai_translate_screenshot.png',
         'static/description/screenshot_01.png',
         'static/description/screenshot_02.png',
         'static/description/screenshot_03.png',
+        'static/description/suite_ai_translate_screenshot.png',
     ],
     'installable': True,
     'application': False,
