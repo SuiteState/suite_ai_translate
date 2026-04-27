@@ -13,9 +13,10 @@ import { patch } from "@web/core/utils/patch";
  */
 patch(Message.prototype, {
     /**
-     * @type {string|undefined} Pre-translation original body text, set
-     * by /suite_ai_translate/mark_last after the Composer's ✈
-     * translation-send button posts a translated message.
+     * @type {string|undefined} Pre-translation original body text,
+     * written atomically inside mail.message.create via the native
+     * post_data pipeline when the Composer's ✈ translation-send button
+     * is clicked.
      */
     sat_original_body: undefined,
 

@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Odoo specific
+*.log
+*.swp
+*.tmp
+filestore/
+sessions/
+
+# Odoo data directories (if not using Docker)
+data/
+logs/
+addons/
+# Note: Only ignore if these are symlinks or not part of your project
+
+# Database dumps
+*.dump
+*.sql
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+desktop.ini
+Thumbs.db
+
+# Windows/Office temp
+~$*
+*.tmp
+*.temp
+
+# Environment and config
+.env
+.env.local
+.env.*.local
+odoo.conf
+local.conf
+
+# Node.js (if you have frontend assets)
+node_modules/
+npm-debug.log*
+
+# Temporary and cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Archives and packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Local development
+/local/
+/custom/local/

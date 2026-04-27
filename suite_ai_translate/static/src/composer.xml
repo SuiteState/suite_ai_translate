@@ -11,7 +11,8 @@
           - [🔄] — manually triggers translation of the composer input.
                    No auto-translate: saves API calls and avoids timing
                    out while the user is still typing/thinking.
-          - [✈]  — swaps preview into input + native send + mark_last.
+          - [✈]  — swaps preview into input + native send (sat_original_body
+                   written atomically inside mail.message.create).
           - [✕]  — closes translation mode.
     -->
     <t t-name="mail.Composer" t-inherit="mail.Composer" t-inherit-mode="extension">
@@ -83,8 +84,9 @@
                         transparent/white bg + purple plane — so the two
                         buttons are visually distinct while using the
                         same universally-recognized "send" icon.
-                        Behavior: swap preview into input + native send
-                        + mark_last archival, all in one click.
+                        Behavior: swap preview into input + native send.
+                        sat_original_body is written atomically inside
+                        mail.message.create via the post_data pipeline.
                     -->
                     <button type="button"
                             class="btn btn-link rounded-circle p-0 o-mail-sat-use flex-shrink-0"
