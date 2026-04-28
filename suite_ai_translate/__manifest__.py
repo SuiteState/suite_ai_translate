@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Discuss AI Translate',
-    'version': '19.0.1.2.2',
+    'version': '19.0.1.2.3',
     'category': 'Productivity/Discuss',
     'summary': 'AI translation for incoming and outgoing messages in Discuss, WhatsApp, and chatter.',
     'description': """
@@ -56,10 +56,10 @@ chat surfaces, privacy details, and configuration options.
         ],
     },
     'images': [
+        'static/description/suite_ai_translate_screenshot.png',
         'static/description/screenshot_01.png',
         'static/description/screenshot_02.png',
         'static/description/screenshot_03.png',
-        'static/description/suite_ai_translate_screenshot.png',
     ],
     'installable': True,
     'application': False,

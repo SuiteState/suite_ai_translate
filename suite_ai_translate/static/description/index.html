@@ -1,319 +1,267 @@
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Discuss AI Translate</h2>
-            <h3 class="oe_slogan" style="font-weight:normal;">AI translation for incoming and outgoing messages in Discuss, WhatsApp, and chatter</h3>
-            <p class="oe_mt32" style="text-align:center;">
-                <img src="suite_ai_translate_screenshot.png"
-                     alt="Discuss AI Translate - main interface"
-                     style="max-width:100%; height:auto; border-radius:4px;"/>
-            </p>
-        </div>
-    </div>
-</section>
+<h1 style="text-align:center;">Discuss AI Translate</h1>
+<h3 style="text-align:center; font-weight:normal; color:#666;">AI translation for incoming and outgoing messages in Discuss, WhatsApp, and chatter</h3>
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Overview</h2>
-            <p class="oe_mt32" style="text-align:justify;">
-                This module adds AI translation to Odoo's messaging surfaces.
-                Translation operates in two directions:
-            </p>
-            <ul>
-                <li><strong>Incoming</strong> &mdash; translate received messages on demand for reading.</li>
-                <li><strong>Outgoing</strong> &mdash; translate composer drafts before sending; the original draft text is archived on the sent message.</li>
-            </ul>
-            <p style="text-align:justify;">
-                Translation is performed by the AI provider configured in Odoo's
-                native <code>ai</code> module &mdash; currently OpenAI or Google Gemini.
-                The module does not require its own API key or SaaS account.
-            </p>
-        </div>
-    </div>
-</section>
+<p style="text-align:center;">
+    <img src="screenshot_01.png"
+         alt="Discuss AI Translate - bidirectional translation with 100+ languages"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Functionality</h2>
-        </div>
-    </div>
-    <div class="oe_row oe_spaced">
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Outgoing message translation</h4>
-            <p style="text-align:justify;">
-                Type a draft in the composer in any source language, click
-                <em>AI Translate</em> above the composer, then send the
-                translated version with one click. The original draft text is
-                archived on the sent message and accessible via
-                <em>View original</em>.
-            </p>
-        </div>
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Incoming message translation</h4>
-            <p style="text-align:justify;">
-                Open any message's three-dot menu and select <em>AI Translate</em>.
-                The translated text appears inline below the original, with a
-                language picker supporting over 100 languages. The last-used
-                target language is remembered per user.
-            </p>
-        </div>
-    </div>
-    <div class="oe_row oe_spaced">
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Chat surface coverage</h4>
-            <p style="text-align:justify;">
-                The translation actions are available in Discuss channels and
-                direct messages, floating chat windows, WhatsApp conversations,
-                the email composer, record chatter on any
-                <code>mail.thread</code> model (CRM, Sales, Helpdesk, etc.),
-                and the live chat agent view.
-            </p>
-        </div>
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Provider failover</h4>
-            <p style="text-align:justify;">
-                A primary model and a failover model can be configured. If the
-                primary provider call fails (network error, rate limit, invalid
-                key), the request is retried on the failover model. Configuring
-                two models from different providers gives cross-provider
-                resilience.
-            </p>
-        </div>
-    </div>
-    <div class="oe_row oe_spaced">
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Translation caching</h4>
-            <p style="text-align:justify;">
-                Translation results are cached per message and target language
-                in Odoo's native translation table
-                (<code>mail.message.translation</code>). Subsequent reads of
-                the same message in the same target language return the cached
-                result without re-calling the AI provider. Cache entries are
-                vacuumed by Odoo's native cleanup mechanism after 2 weeks of
-                non-access.
-            </p>
-        </div>
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Native AI integration</h4>
-            <p style="text-align:justify;">
-                The module consumes the AI provider configuration already set
-                up in Odoo's native <code>ai</code> module. No separate API
-                key, no separate SaaS account, no additional credentials at
-                the module level.
-            </p>
-            <p class="oe_mt32" style="text-align:center;">
-                <img src="screenshot_03.png"
-                     alt="Translation across CRM, chatter, email composer, and direct messages"
-                     style="max-width:100%; height:auto; border-radius:4px;"/>
-            </p>
-        </div>
-    </div>
-</section>
+<hr/>
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Data transmission &amp; privacy</h2>
-            <p class="oe_mt32" style="text-align:justify;">
-                This module transmits message text to a third-party AI provider
-                (OpenAI or Google Gemini, depending on configuration) over
-                HTTPS for the sole purpose of translation. Review this section
-                and ensure compliance with applicable data handling policies
-                before enabling the feature.
-            </p>
-            <h4 style="margin-top:1.5em;">What is sent</h4>
-            <ul>
-                <li>The plain-text body of the message or composer draft selected for translation.</li>
-                <li>The target language code (e.g. <code>en</code>, <code>ar</code>).</li>
-            </ul>
-            <h4>What is not sent</h4>
-            <ul>
-                <li>No author names, recipient names, partner records, email addresses, phone numbers, or other personally-identifiable metadata.</li>
-                <li>No attachments, images, or files.</li>
-                <li>No database records, CRM context, sales data, or invoice data.</li>
-                <li>No analytics or telemetry to any party other than the configured AI provider.</li>
-            </ul>
-            <h4>Recipient of transmitted data</h4>
-            <p style="text-align:justify;">
-                Whichever provider the administrator has configured in Odoo's
-                AI settings &mdash; OpenAI (ChatGPT) and/or Google Gemini.
-                Transmitted text is subject to that provider's terms of
-                service, data retention policies, and applicable privacy law:
-            </p>
-            <ul>
-                <li>OpenAI: <code>https://openai.com/policies/</code></li>
-                <li>Google Gemini: <code>https://ai.google.dev/terms</code></li>
-            </ul>
-            <h4>Opt-in by design</h4>
-            <p style="text-align:justify;">
-                The feature is disabled by default. An administrator must
-                explicitly enable <em>Enable Discuss AI Translate</em> in
-                Settings &rarr; General Settings &rarr; AI &rarr; Discuss AI Translate
-                before any text is transmitted. Translation RPC endpoints
-                refuse to call any AI provider until this opt-in is granted.
-            </p>
-            <h4>Local caching</h4>
-            <p style="text-align:justify;">
-                Translated results are cached in the local Odoo database
-                (<code>mail.message.translation</code> table). Cache entries
-                are not transmitted anywhere and are auto-removed after
-                2 weeks of non-access.
-            </p>
-        </div>
-    </div>
-</section>
+<h2>Overview</h2>
+<p>
+    This module adds AI translation to Odoo's messaging surfaces.
+    Translation operates in two directions:
+</p>
+<ul>
+    <li><strong>Incoming</strong> &mdash; translate received messages on demand for reading.</li>
+    <li><strong>Outgoing</strong> &mdash; translate composer drafts before sending; the original draft text is archived on the sent message.</li>
+</ul>
+<p>
+    Translation is performed by the AI provider configured in Odoo's
+    native <code>ai</code> module &mdash; currently OpenAI or Google Gemini.
+    The module does not require its own API key or SaaS account.
+</p>
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Scope</h2>
-            <p class="oe_mt32" style="text-align:justify;">
-                The full scope of the module is listed below.
-            </p>
-        </div>
-    </div>
-    <div class="oe_row oe_spaced">
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Supported</h4>
-            <ul>
-                <li>Discuss channels and direct messages</li>
-                <li>Floating chat windows (right-bottom popups from the messaging menu)</li>
-                <li>WhatsApp conversations <small>(when Odoo's native <code>whatsapp</code> module is set up)</small></li>
-                <li>Email composer (<code>mail.compose.message</code>)</li>
-                <li>Chatter on any business record (CRM, Sales, Helpdesk, Tasks, any model with <code>mail.thread</code>)</li>
-                <li>Live chat conversations &mdash; agent side, accessed via the Discuss channel view</li>
-            </ul>
-        </div>
-        <div class="oe_span6">
-            <h4 class="oe_slogan" style="text-align:left;">Not in scope</h4>
-            <ul>
-                <li>
-                    <strong>Live chat frontend popup (visitor side).</strong> The visitor-facing
-                    popup widget uses a separate composer component. Agents handle the
-                    conversation from the Discuss backend view, where translation works fully.
-                </li>
-                <li>
-                    <strong>Knowledge module articles.</strong> The Knowledge module uses a
-                    different content structure than <code>mail.thread</code> and is not covered
-                    by this module.
-                </li>
-                <li>
-                    <strong>System UI labels</strong> (menus, buttons, field names). Odoo's
-                    built-in i18n translation system handles these.
-                </li>
-            </ul>
-        </div>
-    </div>
-</section>
+<hr/>
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">AI provider extensibility</h2>
-            <p class="oe_mt32" style="text-align:justify;">
-                The default build supports the AI providers integrated in
-                Odoo's native <code>ai</code> module: OpenAI and Google Gemini.
-                The module's provider layer can be extended to other AI
-                providers &mdash; for example, when the default providers are not
-                reachable from a given region, when a domain-specialized model
-                is preferred for a specific language pair, or when a different
-                provider is required for organizational reasons.
-            </p>
-            <p style="text-align:justify;">
-                For inquiries about extending to a different AI provider,
-                contact <code>hello@suitestate.com</code>.
-            </p>
-        </div>
-    </div>
-</section>
+<h2>Functionality</h2>
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Requirements</h2>
-            <ul>
-                <li><strong>Odoo 19 Enterprise.</strong> Depends on the <code>ai</code> and <code>ai_app</code> modules, which are part of the Enterprise edition.</li>
-                <li><strong>An OpenAI or Google Gemini API key</strong> configured in Settings &rarr; General Settings &rarr; AI. The module does not bundle or manage its own keys.</li>
-                <li><strong>Network egress</strong> from the Odoo server to <code>api.openai.com</code> and/or <code>generativelanguage.googleapis.com</code>.</li>
-                <li>
-                    <strong>For WhatsApp translation (optional):</strong> Odoo's native
-                    <code>whatsapp</code> module installed and configured with a valid
-                    Meta WhatsApp Business Account. This module does not integrate with
-                    the WhatsApp Business API itself &mdash; it only adds translation
-                    capability to WhatsApp conversations already handled by Odoo's
-                    native module. Setting up WhatsApp in Odoo (Meta Business Account,
-                    phone number verification, template approval) is handled by the
-                    native <code>whatsapp</code> module and is not in scope of this app.
-                </li>
-            </ul>
-        </div>
-    </div>
-</section>
+<h3>Outgoing message translation</h3>
+<p>
+    Type a draft in the composer in any source language, click
+    <em>AI Translate</em> above the composer, then send the
+    translated version with one click. The original draft text is
+    archived on the sent message and accessible via
+    <em>View original</em>.
+</p>
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Supported languages</h2>
-            <p class="oe_mt32" style="text-align:justify;">
-                Over 100 languages, including English, Arabic, Chinese
-                (Simplified and Traditional), Spanish, Hindi, Portuguese,
-                Bengali, Russian, Japanese, German, French, Urdu, Indonesian,
-                Italian, Turkish, Korean, Vietnamese, Persian, Polish, Thai,
-                Dutch, Ukrainian, Hebrew, Swahili, and others. Translation
-                quality for a given language pair depends on the AI provider.
-            </p>
-            <p style="text-align:justify;">
-                Right-to-left languages (Arabic, Persian, Urdu, Hebrew, Pashto,
-                Kurdish, Yiddish) render with <code>dir="rtl"</code> in the
-                translation preview and panel.
-            </p>
-        </div>
-    </div>
-</section>
+<h3>Incoming message translation</h3>
+<p>
+    Open any message's three-dot menu and select <em>AI Translate</em>.
+    The translated text appears inline below the original, with a
+    language picker supporting over 100 languages. The last-used
+    target language is remembered per user.
+</p>
 
-<section class="oe_container">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">Configuration</h2>
-            <p>All configuration is in Settings &rarr; General Settings &rarr; AI &rarr; Discuss AI Translate:</p>
-            <ul>
-                <li><strong>Enable Discuss AI Translate</strong> &mdash; opt-in switch (off by default).</li>
-                <li><strong>Translation Model</strong> &mdash; primary model used for every translation request.</li>
-                <li><strong>Failover Model</strong> &mdash; automatic fallback when the primary provider fails.</li>
-            </ul>
-            <p>
-                Two system parameters are available for advanced tuning:
-                <code>suite_ai_translate.temperature</code> (default <code>0.2</code>) controls
-                LLM sampling temperature, and
-                <code>suite_ai_translate.max_input_chars</code> (default <code>8000</code>)
-                sets the per-message length cap.
-            </p>
-            <p class="oe_mt32" style="text-align:center;">
-                <img src="screenshot_02.png"
-                     alt="Discuss AI Translate settings panel"
-                     style="max-width:100%; height:auto; border-radius:4px;"/>
-            </p>
-        </div>
-    </div>
-</section>
+<h3>Chat surface coverage</h3>
+<p>
+    The translation actions are available in Discuss channels and
+    direct messages, floating chat windows, WhatsApp conversations,
+    the email composer, record chatter on any
+    <code>mail.thread</code> model (CRM, Sales, Helpdesk, etc.),
+    and the live chat agent view.
+</p>
 
-<section class="oe_container oe_dark">
-    <div class="oe_row oe_spaced">
-        <div class="oe_span12">
-            <h2 class="oe_slogan">License &amp; support</h2>
-            <p style="text-align:justify;">
-                Released under the <strong>GNU Lesser General Public License v3</strong>
-                (LGPL-3.0-or-later). The full license text is included in the
-                <code>LICENSE</code> file shipped with the module.
-            </p>
-            <p style="text-align:justify;">
-                Maintained by <strong>SuiteState</strong>. For questions, bug
-                reports, or feature requests, visit
-                <a href="https://suitestate.com">suitestate.com</a> or contact
-                <code>hello@suitestate.com</code>.
-            </p>
-        </div>
-    </div>
-</section>
+<p style="text-align:center;">
+    <img src="screenshot_03.png"
+         alt="Translation across CRM, chatter, email composer, and direct messages"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<h3>Provider failover</h3>
+<p>
+    A primary model and a failover model can be configured. If the
+    primary provider call fails (network error, rate limit, invalid
+    key), the request is retried on the failover model. Configuring
+    two models from different providers gives cross-provider
+    resilience.
+</p>
+
+<h3>Translation caching</h3>
+<p>
+    Translation results are cached per message and target language
+    in Odoo's native translation table
+    (<code>mail.message.translation</code>). Subsequent reads of
+    the same message in the same target language return the cached
+    result without re-calling the AI provider. Cache entries are
+    vacuumed by Odoo's native cleanup mechanism after 2 weeks of
+    non-access.
+</p>
+
+<h3>Native AI integration</h3>
+<p>
+    The module consumes the AI provider configuration already set
+    up in Odoo's native <code>ai</code> module. No separate API
+    key, no separate SaaS account, no additional credentials at
+    the module level.
+</p>
+
+<hr/>
+
+<h2>Data transmission &amp; privacy</h2>
+<p>
+    This module transmits message text to a third-party AI provider
+    (OpenAI or Google Gemini, depending on configuration) over
+    HTTPS for the sole purpose of translation. Review this section
+    and ensure compliance with applicable data handling policies
+    before enabling the feature.
+</p>
+
+<h3>What is sent</h3>
+<ul>
+    <li>The plain-text body of the message or composer draft selected for translation.</li>
+    <li>The target language code (e.g. <code>en</code>, <code>ar</code>).</li>
+</ul>
+
+<h3>What is not sent</h3>
+<ul>
+    <li>No author names, recipient names, partner records, email addresses, phone numbers, or other personally-identifiable metadata.</li>
+    <li>No attachments, images, or files.</li>
+    <li>No database records, CRM context, sales data, or invoice data.</li>
+    <li>No analytics or telemetry to any party other than the configured AI provider.</li>
+</ul>
+
+<h3>Recipient of transmitted data</h3>
+<p>
+    Whichever provider the administrator has configured in Odoo's
+    AI settings &mdash; OpenAI (ChatGPT) and/or Google Gemini.
+    Transmitted text is subject to that provider's terms of
+    service, data retention policies, and applicable privacy law:
+</p>
+<ul>
+    <li>OpenAI: <code>https://openai.com/policies/</code></li>
+    <li>Google Gemini: <code>https://ai.google.dev/terms</code></li>
+</ul>
+
+<h3>Opt-in by design</h3>
+<p>
+    The feature is disabled by default. An administrator must
+    explicitly enable <em>Enable Discuss AI Translate</em> in
+    Settings &rarr; General Settings &rarr; AI &rarr; Discuss AI Translate
+    before any text is transmitted. Translation RPC endpoints
+    refuse to call any AI provider until this opt-in is granted.
+</p>
+
+<h3>Local caching</h3>
+<p>
+    Translated results are cached in the local Odoo database
+    (<code>mail.message.translation</code> table). These cache entries
+    are not transmitted anywhere and are auto-removed after
+    2 weeks of non-access.
+</p>
+
+<hr/>
+
+<h2>Scope</h2>
+<p>The full scope of the module is listed below.</p>
+
+<h3>Supported</h3>
+<ul>
+    <li>Discuss channels and direct messages</li>
+    <li>Floating chat windows (right-bottom popups from the messaging menu)</li>
+    <li>WhatsApp conversations <small>(when Odoo's native <code>whatsapp</code> module is set up)</small></li>
+    <li>Email composer (<code>mail.compose.message</code>)</li>
+    <li>Chatter on any business record (CRM, Sales, Helpdesk, Tasks, any model with <code>mail.thread</code>)</li>
+    <li>Live chat conversations &mdash; agent side, accessed via the Discuss channel view</li>
+</ul>
+
+<h3>Not in scope</h3>
+<ul>
+    <li>
+        <strong>Live chat frontend popup (visitor side).</strong> The visitor-facing
+        popup widget uses a separate composer component. Agents handle the
+        conversation from the Discuss backend view, where translation works fully.
+    </li>
+    <li>
+        <strong>Knowledge module articles.</strong> The Knowledge module uses a
+        different content structure than <code>mail.thread</code> and is not covered
+        by this module.
+    </li>
+    <li>
+        <strong>System UI labels</strong> (menus, buttons, field names). Odoo's
+        built-in i18n translation system handles these.
+    </li>
+</ul>
+
+<hr/>
+
+<h2>AI provider extensibility</h2>
+<p>
+    The default build supports the AI providers integrated in
+    Odoo's native <code>ai</code> module: OpenAI and Google Gemini.
+    The module's provider layer can be extended to other AI
+    providers &mdash; for example, when the default providers are not
+    reachable from a given region, when a domain-specialized model
+    is preferred for a specific language pair, or when a different
+    provider is required for organizational reasons.
+</p>
+<p>
+    For inquiries about extending to a different AI provider,
+    contact <code>hello@suitestate.com</code>.
+</p>
+
+<hr/>
+
+<h2>Requirements</h2>
+<ul>
+    <li><strong>Odoo 19 Enterprise.</strong> Depends on the <code>ai</code> and <code>ai_app</code> modules, which are part of the Enterprise edition.</li>
+    <li><strong>An OpenAI or Google Gemini API key</strong> configured in Settings &rarr; General Settings &rarr; AI. The module does not bundle or manage its own keys.</li>
+    <li><strong>Network egress</strong> from the Odoo server to <code>api.openai.com</code> and/or <code>generativelanguage.googleapis.com</code>.</li>
+    <li>
+        <strong>For WhatsApp translation (optional):</strong> Odoo's native
+        <code>whatsapp</code> module installed and configured with a valid
+        Meta WhatsApp Business Account. This module does not integrate with
+        the WhatsApp Business API itself &mdash; it only adds translation
+        capability to WhatsApp conversations already handled by Odoo's
+        native module. Setting up WhatsApp in Odoo (Meta Business Account,
+        phone number verification, template approval) is handled by the
+        native <code>whatsapp</code> module and is not in scope of this app.
+    </li>
+</ul>
+
+<hr/>
+
+<h2>Supported languages</h2>
+<p>
+    Over 100 languages, including English, Arabic, Chinese
+    (Simplified and Traditional), Spanish, Hindi, Portuguese,
+    Bengali, Russian, Japanese, German, French, Urdu, Indonesian,
+    Italian, Turkish, Korean, Vietnamese, Persian, Polish, Thai,
+    Dutch, Ukrainian, Hebrew, Swahili, and others. Translation
+    quality for a given language pair depends on the AI provider.
+</p>
+<p>
+    Right-to-left languages (Arabic, Persian, Urdu, Hebrew, Pashto,
+    Kurdish, Yiddish) render with <code>dir="rtl"</code> in the
+    translation preview and panel.
+</p>
+
+<hr/>
+
+<h2>Configuration</h2>
+<p>All configuration is in Settings &rarr; General Settings &rarr; AI &rarr; Discuss AI Translate:</p>
+<ul>
+    <li><strong>Enable Discuss AI Translate</strong> &mdash; opt-in switch (off by default).</li>
+    <li><strong>Translation Model</strong> &mdash; primary model used for every translation request.</li>
+    <li><strong>Failover Model</strong> &mdash; automatic fallback when the primary provider fails.</li>
+</ul>
+<p>
+    Two system parameters are available for advanced tuning:
+    <code>suite_ai_translate.temperature</code> (default <code>0.2</code>) controls
+    LLM sampling temperature, and
+    <code>suite_ai_translate.max_input_chars</code> (default <code>8000</code>)
+    sets the per-message length cap.
+</p>
+
+<p style="text-align:center;">
+    <img src="screenshot_02.png"
+         alt="Discuss AI Translate settings panel"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<hr/>
+
+<h2>License &amp; support</h2>
+<p>
+    Released under the <strong>GNU Lesser General Public License v3</strong>
+    (LGPL-3.0-or-later). The full license text is included in the
+    <code>LICENSE</code> file shipped with the module.
+</p>
+<p>
+    Maintained by <strong>SuiteState</strong>. For questions, bug
+    reports, or feature requests, visit
+    <a href="https://suitestate.com">suitestate.com</a> or contact
+    <code>hello@suitestate.com</code>.
+</p>
