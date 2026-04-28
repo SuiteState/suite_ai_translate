@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Discuss AI Translate',
+    'name': 'Bidirectional AI Translate',
     'version': '19.0.1.2.3',
     'category': 'Productivity/Discuss',
-    'summary': 'AI translation for incoming and outgoing messages in Discuss, WhatsApp, and chatter.',
+    'summary': 'Bidirectional real-time AI translation for Discuss, WhatsApp, and chatter conversations. Two-way translation for multilingual customer support.',
     'description': """
-Discuss AI Translate
-====================
+Bidirectional AI Translate
+==========================
 
-AI translation for messages in Odoo Discuss, WhatsApp, email composer, and
-record chatter. Translation works in two directions:
+Bidirectional, real-time AI translation for Odoo conversations. Two-way
+translation in Discuss, WhatsApp, email composer, and record chatter --
+multilingual customer support without language barriers.
+
+Translation operates in two directions:
 
 - **Incoming**: translate any received message on demand from its three-dot
   menu, with a 100+ language picker.
