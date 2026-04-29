@@ -1,0 +1,339 @@
+<h1 style="text-align:center;">Contact Guard</h1>
+<h3 style="text-align:center; font-weight:normal; color:#666;">Phone uniqueness, contact field permissions, and customer activity status &mdash; for Odoo 19 sales teams</h3>
+
+<hr/>
+
+<h2>Built for B2B teams where phone numbers are the asset</h2>
+
+<p>
+You run a sales team. Multiple salespeople, one shared contact pool.
+You want everyone to see that a customer exists (so nobody creates a
+duplicate), but you don&apos;t want one salesperson casually browsing
+another salesperson&apos;s customer phone numbers and emails.
+</p>
+
+<p>
+And you want this without breaking quotations, invoices, login,
+or any other place Odoo touches <code>res.partner</code> behind the scenes.
+</p>
+
+<p>Three problems Contact Guard solves on day one:</p>
+
+<ul>
+  <li><b>Salespeople poaching each other&apos;s contacts</b> via casual
+      list browsing and search-as-you-type</li>
+  <li><b>Duplicate contacts created</b> because nobody noticed the
+      same phone already exists in the system</li>
+  <li><b>Customers going dark for months</b> with no automatic
+      tracking of who hasn&apos;t ordered in a while</li>
+</ul>
+
+<hr/>
+
+<h2>Three independent features, configured per company</h2>
+
+<h3>1. Phone uniqueness</h3>
+
+<p>
+Phone numbers are normalized to digits-only (stripping +, leading 00,
+spaces, dashes, parentheses) and stored in an indexed field.
+When a user tries to save a contact with a phone that already exists
+in the same company, the operation is rejected with an error
+naming the conflicting number.
+</p>
+
+<p>
+Bypassed automatically for system automation, bulk imports
+(<code>import_file</code> context), and external public/portal
+users. Configurable minimum length per company (default: 8 digits).
+</p>
+
+<p style="text-align:center;">
+    <img src="screenshot_phone_uniqueness.png"
+         alt="Phone uniqueness duplicate detection"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<h3>2. Contact field permissions</h3>
+
+<p>
+Once a contact has an assigned salesperson, their phone and email
+become private to that salesperson and to administrators.
+Contacts without a salesperson stay visible to all internal users
+&mdash; so anyone can pick up a new lead, but established customers
+are protected.
+</p>
+
+<p>
+The salesperson field itself is locked after creation:
+only Sales Manager / Contact Guard Admin can reassign customers
+between salespeople.
+</p>
+
+<p>
+Phone edit protection is enforced at the ORM layer, not just the
+view, so it applies to RPC, scripts, and automated actions in
+addition to the web UI.
+</p>
+
+<p style="text-align:center;">
+    <img src="screenshot_field_permissions.png"
+         alt="Phone and email visibility per salesperson"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<h3>3. Customer activity status</h3>
+
+<p>
+A daily cron computes each customer&apos;s activity status from
+their last confirmed sale order date:
+</p>
+
+<ul>
+  <li><b>Active</b> &mdash; recent order, within warning threshold</li>
+  <li><b>Warning</b> (yellow) &mdash; past warning threshold,
+      time to follow up</li>
+  <li><b>Sleeping</b> (red) &mdash; past sleeping threshold,
+      losing them</li>
+  <li><b>Dormant</b> (muted) &mdash; past dormant threshold,
+      probably gone</li>
+</ul>
+
+<p>
+Status appears on the contact form, on the contact list with
+colour decoration, and is available for filtering and grouping.
+Thresholds are configurable per company.
+</p>
+
+<p style="text-align:center;">
+    <img src="screenshot_activity_status.png"
+         alt="Customer activity status with colour decoration"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<hr/>
+
+<h2>Why this works without breaking your sales workflow</h2>
+
+<p>
+Most &quot;private contacts&quot; modules on the Apps Store and most
+forum answers tell you to add a record rule on <code>res.partner</code>
+like <code>[(&apos;user_id&apos;, &apos;=&apos;, user.id)]</code>.
+We tried that route first and abandoned it.
+</p>
+
+<p>
+<code>res.partner</code> is the central reference hub of Odoo.
+The moment you tighten read access on it with a record rule,
+every place that <i>implicitly</i> loads a related partner can fail
+with <code>AccessError</code>:
+</p>
+
+<ul>
+  <li>Salespeople cannot open their own quotations
+      (<code>partner_invoice_id</code> / <code>partner_shipping_id</code>
+      access denied)</li>
+  <li>Login fails because <code>res.users</code> reverse-references
+      the user&apos;s own partner record</li>
+  <li>Chatter, followers, activities throw
+      &quot;Implicitly accessed through Users&quot; errors</li>
+  <li>Multi-company partners (companion partners of
+      <code>res.company</code>) become invisible and break warehouse
+      and journal routing</li>
+</ul>
+
+<p>
+Existing solutions to these errors are all unpleasant: edit the
+built-in private-employee record rule, split internal users into
+two parallel groups, add a chain of <code>OR</code> clauses for every
+new edge case. Every workaround leaks. Odoo itself removed the
+original <code>res.partner.rule.private</code> rule in version 17
+because the design caused too many regressions.
+</p>
+
+<p>
+<b>Contact Guard takes a different stance.</b> Contact records stay
+fully visible to all internal users &mdash; quotations open,
+chatter loads, login works. Phone, email, and salesperson are
+the things you actually want to protect, and those are gated
+through field-level groups, ORM write hooks, and view-level groups.
+</p>
+
+<hr/>
+
+<h2>Who can do what</h2>
+
+<p>
+In the table below, <i>Salesperson</i> means the user assigned as
+salesperson on that specific contact. <i>SM/CGA</i> means Sales
+Manager or Contact Guard Admin (Sales Manager automatically implies
+Contact Guard Admin, so they are equivalent for these checks).
+</p>
+
+<table style="width:100%; border-collapse:collapse; font-size:14px; margin: 1em 0;">
+  <tr style="background:#f5f5f5;">
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Operation</th>
+    <th style="padding:8px; border:1px solid #ddd;">Internal User</th>
+    <th style="padding:8px; border:1px solid #ddd;">Salesperson of contact</th>
+    <th style="padding:8px; border:1px solid #ddd;">Purchase Manager</th>
+    <th style="padding:8px; border:1px solid #ddd;">Contact Manager</th>
+    <th style="padding:8px; border:1px solid #ddd;">SM / CGA</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">See phone/email column in list and kanban</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">See phone/email on form (contact has no salesperson)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">-</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">See phone/email on form (contact has salesperson)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">First-time fill of phone (was empty)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Edit existing phone (no salesperson)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Edit existing phone (with salesperson)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Set salesperson on contact creation</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Change salesperson on existing contact</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">See Activity Status (form tab and list columns)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">No</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Yes</td>
+  </tr>
+</table>
+
+<hr/>
+
+<h2>Configuration</h2>
+
+<p>
+Contact Guard configures per company under
+<b>Contacts -&gt; Configuration -&gt; Contact Guard</b>
+(visible to System Administrators).
+</p>
+
+<p>
+<b>Important:</b> the protection features are on by default and
+do not require a configuration record. Phone uniqueness, field
+permissions, and salesperson lock start working the moment you
+install the module. Configuration only lets you tune parameters
+(such as the minimum phone length) or opt in to the activity
+tracking cron.
+</p>
+
+<table style="width:100%; border-collapse:collapse; font-size:14px; margin: 1em 0;">
+  <tr style="background:#f5f5f5;">
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Feature</th>
+    <th style="padding:8px; border:1px solid #ddd;">Default state</th>
+    <th style="padding:8px; border:1px solid #ddd;">What configuration changes</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Phone uniqueness</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">On</td>
+    <td style="padding:8px; border:1px solid #ddd;">Adjusts the minimum digit count (default 8)</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Field permissions (phone / email / salesperson)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">On</td>
+    <td style="padding:8px; border:1px solid #ddd;">No configuration; behaviour is fixed by role</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Customer activity status</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Off</td>
+    <td style="padding:8px; border:1px solid #ddd;">Enables the daily cron and sets Warning / Sleeping / Dormant thresholds</td>
+  </tr>
+</table>
+
+<p style="text-align:center;">
+    <img src="screenshot_configuration.png"
+         alt="Per-company configuration"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<hr/>
+
+<h2>Compatibility</h2>
+
+<ul>
+  <li>Odoo 19.0 (Community and Enterprise)</li>
+  <li>Multi-company aware: every check and configuration is scoped
+      per company</li>
+  <li>No database-level constraints; enforcement at the ORM, field,
+      or view layer depending on the rule</li>
+  <li>Depends only on standard Odoo modules: <code>contacts</code>,
+      <code>mail</code>, <code>sales_team</code>,
+      <code>sale</code>, <code>purchase</code></li>
+</ul>
+
+<hr/>
+
+<h2>About SuiteState</h2>
+
+<p>
+We built and use Contact Guard ourselves at SuiteState across
+multiple businesses. We open-sourced it under LGPL-3 because
+the pain is universal.
+</p>
+
+<p>
+SuiteState publishes a growing collection of focused, production-tested
+Odoo modules under the <i>Guard</i> series (Contact Guard, with
+Data Guard, Cost Guard, and Sale Price Guard following).
+Every module is independent &mdash; install only what you need.
+</p>
+
+<p>
+GitHub: <a href="https://github.com/SuiteState/community">github.com/SuiteState/community</a><br/>
+Website: <a href="https://suitestate.com">suitestate.com</a>
+</p>

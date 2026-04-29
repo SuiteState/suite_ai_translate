@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Contact kanban view: hide phone/email rows on cards from users
+        who are not Contact Guard Admin, Contact Manager, or System.
+
+        In Odoo 19, the partner kanban template wraps each contact
+        attribute in a conditional div ("t-if"), like:
+            <div t-if="record.phone.raw_value">
+                <field name="phone"/>
+            </div>
+
+        We target the parent div of each field and apply the groups
+        attribute there. Hiding the entire div is more robust than
+        hiding the field alone, because it avoids any Owl-template
+        lookup of undefined fields when the user lacks access.
+
+        XPath note: //field[@name='phone']/.. selects the parent div
+        of the phone field. Same for email.
+    -->
+    <record id="res_partner_kanban_inherit_contact_guard"
+            model="ir.ui.view">
+        <field name="name">res.partner.kanban.contact.guard</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.res_partner_kanban_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='phone']/.." position="attributes">
+                <attribute name="groups">base.group_system,base.group_partner_manager,suite_contact_guard.group_contact_guard_admin</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='email']/.." position="attributes">
+                <attribute name="groups">base.group_system,base.group_partner_manager,suite_contact_guard.group_contact_guard_admin</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
+

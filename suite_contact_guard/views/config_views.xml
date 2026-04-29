@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="contact_guard_config_form" model="ir.ui.view">
+        <field name="name">suite.contact.guard.config.form</field>
+        <field name="model">suite.contact.guard.config</field>
+        <field name="arch" type="xml">
+            <form string="Contact Guard Configuration">
+                <sheet>
+                    <group>
+                        <field name="company_id"
+                               groups="base.group_multi_company"/>
+                    </group>
+                    <group string="Phone Uniqueness">
+                        <field name="suite_phone_min_length"/>
+                    </group>
+                    <group string="Customer Activity Status">
+                        <field name="suite_activity_enabled"/>
+                    </group>
+                    <group string="Activity Thresholds (days since last confirmed sale)"
+                           invisible="not suite_activity_enabled">
+                        <field name="suite_warning_after_days"/>
+                        <field name="suite_sleeping_after_days"/>
+                        <field name="suite_dormant_after_days"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="contact_guard_config_list" model="ir.ui.view">
+        <field name="name">suite.contact.guard.config.list</field>
+        <field name="model">suite.contact.guard.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="company_id"/>
+                <field name="suite_phone_min_length" string="Phone Min"/>
+                <field name="suite_activity_enabled" string="Activity"/>
+                <field name="suite_warning_after_days" string="Warning"/>
+                <field name="suite_sleeping_after_days" string="Sleeping"/>
+                <field name="suite_dormant_after_days" string="Dormant"/>
+            </list>
+        </field>
+    </record>
+
+    <!--
+        The action's URL is reachable by any internal user who knows
+        the XML id, but the configuration values exposed (phone min
+        length, activity day thresholds) are operational settings,
+        not sensitive data. The menu under Contacts > Configuration
+        is gated to System Administrators below; this is sufficient
+        for the threat model.
+
+        Note: ir.actions.act_window has no groups_id field in Odoo 19,
+        and even where the field exists in older versions Odoo does
+        not enforce it on URL access (long-standing framework
+        behaviour). Action-level group restriction is therefore not
+        a usable lever; rely on menu groups + model ACL instead.
+    -->
+    <record id="action_contact_guard_config" model="ir.actions.act_window">
+        <field name="name">Contact Guard</field>
+        <field name="res_model">suite.contact.guard.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="contact_guard_config_list"/>
+    </record>
+
+    <menuitem id="menu_contact_guard_config"
+              name="Contact Guard"
+              parent="contacts.res_partner_menu_config"
+              action="action_contact_guard_config"
+              sequence="50"
+              groups="base.group_system"/>
+
+</odoo>

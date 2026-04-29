@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Contact Guard privilege.
+
+        In Odoo 19, res.groups no longer references ir.module.category
+        directly. Groups belong to a res.groups.privilege which belongs
+        to a category.
+
+        We register Contact Guard as its own privilege under the Sales
+        category, since Sales Manager implies Contact Guard Admin.
+        This places our admin group in the "Sales" section of the user
+        permissions form, where Sales Managers expect to find it.
+    -->
+    <record id="privilege_contact_guard" model="res.groups.privilege">
+        <field name="name">Contact Guard</field>
+        <field name="sequence">50</field>
+        <field name="category_id"
+               ref="base.module_category_sales"/>
+    </record>
+
+    <!--
+        Contact Guard Administrator group.
+
+        Members of this group can:
+          - Edit phone numbers on contacts that already have one
+          - Assign or change the salesperson on a contact
+          - See phone/email columns on contact lists
+          - See the Activity Status of customers
+
+        Membership inheritance:
+        Sales Manager (sales_team.group_sale_manager) implies
+        this group, so every Sales Manager automatically gains
+        Contact Guard Admin powers. The reverse does NOT hold:
+        granting Contact Guard Admin alone does not make a user
+        a Sales Manager. This lets administrators assign Contact
+        Guard Admin to roles outside the sales hierarchy
+        (Account Manager, Operations Director, etc.) without
+        accidentally granting Sales Manager privileges.
+    -->
+    <record id="group_contact_guard_admin" model="res.groups">
+        <field name="name">Contact Guard Administrator</field>
+        <field name="privilege_id" ref="privilege_contact_guard"/>
+        <field name="comment">Members can override Contact Guard
+            protections: edit phone on existing contacts, assign
+            salespersons, and see customer activity status.
+        </field>
+    </record>
+
+    <!--
+        Wire Sales Manager -> Contact Guard Admin.
+
+        We extend the existing Sales Manager group to imply
+        Contact Guard Admin. This keeps the privilege one-way:
+        Sales Manager users automatically get Contact Guard Admin,
+        but a standalone Contact Guard Admin assignment does not
+        elevate the user to Sales Manager.
+
+        noupdate="0" is required here: the file-level noupdate="1"
+        protects our own group definitions from being overwritten
+        on module upgrade, but the link from sales_team.group_sale_manager
+        must be (re)applied on every upgrade. Without noupdate="0",
+        Odoo skips this record when the module is updated.
+    -->
+    <data noupdate="0">
+        <record id="sales_team.group_sale_manager" model="res.groups">
+            <field name="implied_ids"
+                   eval="[(4, ref('group_contact_guard_admin'))]"/>
+        </record>
+    </data>
+
+</odoo>
+

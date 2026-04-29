@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_partner_form_inherit_contact_guard"
+            model="ir.ui.view">
+        <field name="name">res.partner.form.contact.guard</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Inject role flag fields as invisible (for view expressions) -->
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="suite_is_admin" invisible="1"/>
+                <field name="suite_is_contact_manager" invisible="1"/>
+                <field name="suite_is_purchase_user" invisible="1"/>
+                <field name="suite_is_my_contact" invisible="1"/>
+            </xpath>
+
+            <!--
+                Phone visibility on form:
+                  - Always visible if no salesperson is assigned yet.
+                  - Once a salesperson is assigned, hidden from everyone
+                    EXCEPT: the assigned salesperson, Contact Guard Admin,
+                    or Contact Manager.
+            -->
+            <xpath expr="//field[@name='phone']" position="attributes">
+                <attribute name="placeholder">e.g. +971 50 123 4567</attribute>
+                <attribute name="invisible">user_id != False and not suite_is_my_contact and not suite_is_admin and not suite_is_contact_manager</attribute>
+            </xpath>
+
+            <!-- Email visibility: same rule as phone -->
+            <xpath expr="//field[@name='email']" position="attributes">
+                <attribute name="invisible">user_id != False and not suite_is_my_contact and not suite_is_admin and not suite_is_contact_manager</attribute>
+            </xpath>
+
+            <!-- Salesperson field: only Contact Guard Admin can edit -->
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="readonly">not suite_is_admin</attribute>
+            </xpath>
+
+            <!--
+                Purchase tab/group: visible only to roles that have a
+                business reason to see vendor pricing/terms.
+                Group name in the base view is 'purchase'.
+            -->
+            <xpath expr="//group[@name='purchase']" position="attributes">
+                <attribute name="invisible">not suite_is_purchase_user and not suite_is_contact_manager and not suite_is_admin</attribute>
+            </xpath>
+
+            <!--
+                Activity Status tab: visible to admin and contact manager.
+                Field-level groups already restrict who reads the data;
+                this hides the entire tab so non-privileged users do not
+                see an empty page.
+            -->
+            <xpath expr="//page[@name='internal_notes']" position="before">
+                <page string="Activity Status"
+                      name="suite_activity_status_page"
+                      groups="suite_contact_guard.group_contact_guard_admin,base.group_partner_manager">
+                    <group>
+                        <field name="suite_has_orders" invisible="1"/>
+                        <field name="suite_activity_status"
+                               invisible="not suite_has_orders"/>
+                        <field name="suite_last_order_date"
+                               invisible="not suite_has_orders"/>
+                        <field name="suite_days_since_order"
+                               invisible="not suite_has_orders"/>
+                        <div colspan="2"
+                             invisible="suite_has_orders"
+                             class="text-muted">
+                            No confirmed sale order yet.
+                        </div>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

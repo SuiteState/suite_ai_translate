@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Contact list (tree/list view):
+          - phone and email columns visible only to Contact Guard Admin,
+            Contact Manager, and System.
+          - Activity status columns added with decoration colors.
+
+        This is base.view_partner_tree, the SINGLE list view definition
+        for res.partner. All Odoo apps (Sales, Purchase, Accounting,
+        CRM, etc.) inherit from it, so this one override applies
+        everywhere.
+    -->
+    <record id="view_partner_tree_inherit_contact_guard"
+            model="ir.ui.view">
+        <field name="name">res.partner.list.contact.guard</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='phone']" position="attributes">
+                <attribute name="groups">base.group_system,base.group_partner_manager,suite_contact_guard.group_contact_guard_admin</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='email']" position="attributes">
+                <attribute name="groups">base.group_system,base.group_partner_manager,suite_contact_guard.group_contact_guard_admin</attribute>
+            </xpath>
+
+            <!--
+                Activity status columns inserted after activity_ids
+                (the standard 'next activity' column near the right).
+                'optional' lets users toggle column visibility per
+                their preference.
+            -->
+            <xpath expr="//field[@name='activity_ids']" position="after">
+                <field name="suite_activity_status"
+                       optional="show"
+                       groups="suite_contact_guard.group_contact_guard_admin,base.group_partner_manager"
+                       decoration-warning="suite_activity_status == 'warning'"
+                       decoration-danger="suite_activity_status == 'sleeping'"
+                       decoration-muted="suite_activity_status == 'dormant'"/>
+                <field name="suite_days_since_order"
+                       widget="badge"
+                       optional="hide"
+                       groups="suite_contact_guard.group_contact_guard_admin,base.group_partner_manager"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
