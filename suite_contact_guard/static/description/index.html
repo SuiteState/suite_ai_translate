@@ -1,52 +1,85 @@
 <h1 style="text-align:center;">Contact Guard</h1>
-<h3 style="text-align:center; font-weight:normal; color:#666;">Phone uniqueness, contact field permissions, and customer activity status &mdash; for Odoo 19 sales teams</h3>
+<h3 style="text-align:center; font-weight:normal; color:#666;">Phone uniqueness, contact field permissions, and customer activity status for Odoo 19</h3>
 
 <hr/>
 
-<h2>Built for B2B teams where phone numbers are the asset</h2>
+<h2>Overview</h2>
 
 <p>
-You run a sales team. Multiple salespeople, one shared contact pool.
-You want everyone to see that a customer exists (so nobody creates a
-duplicate), but you don&apos;t want one salesperson casually browsing
-another salesperson&apos;s customer phone numbers and emails.
+Contact Guard adds three independent governance layers on
+<code>res.partner</code>:
 </p>
-
-<p>
-And you want this without breaking quotations, invoices, login,
-or any other place Odoo touches <code>res.partner</code> behind the scenes.
-</p>
-
-<p>Three problems Contact Guard solves on day one:</p>
 
 <ul>
-  <li><b>Salespeople poaching each other&apos;s contacts</b> via casual
-      list browsing and search-as-you-type</li>
-  <li><b>Duplicate contacts created</b> because nobody noticed the
-      same phone already exists in the system</li>
-  <li><b>Customers going dark for months</b> with no automatic
-      tracking of who hasn&apos;t ordered in a while</li>
+  <li>ORM-enforced phone uniqueness, scoped per company</li>
+  <li>Role-based visibility and edit protection on phone, email, and
+      salesperson fields</li>
+  <li>Daily-cron customer activity status (Active / Warning / Sleeping
+      / Dormant) computed from confirmed sale orders</li>
+</ul>
+
+<p>
+All features are configured per company. None introduce database-level
+constraints; enforcement happens at the ORM, field, or view layer
+depending on the rule.
+</p>
+
+<hr/>
+
+<h2>Design principles</h2>
+
+<p>
+This module is designed around the following principles. They explain
+the technical decisions in subsequent sections.
+</p>
+
+<ul>
+  <li><b>Partner records remain globally readable.</b> All internal
+      users can read <code>res.partner</code> records. Restricting
+      partner read access via <code>ir.rule</code> is not used.</li>
+  <li><b>Cross-team workflows are preserved.</b> Accounting, Warehouse,
+      Purchase, HR, and CRM modules continue to access partner records
+      through their normal references (invoice addresses, delivery
+      addresses, vendor records, employee partners, lead partners).</li>
+  <li><b>Protection is applied at the field level.</b> Phone, email,
+      and salesperson are the protected fields. Visibility and edit
+      rules are applied per-field via field-level <code>groups=</code>,
+      ORM write hooks, and view-level <code>groups=</code>.</li>
+  <li><b>Per-company scoping.</b> Every check, threshold, and
+      configuration is scoped to a single company. Multi-company
+      installations get independent configurations per company.</li>
 </ul>
 
 <hr/>
 
-<h2>Three independent features, configured per company</h2>
+<h2>Functionality</h2>
 
 <h3>1. Phone uniqueness</h3>
 
 <p>
-Phone numbers are normalized to digits-only (stripping +, leading 00,
-spaces, dashes, parentheses) and stored in an indexed field.
-When a user tries to save a contact with a phone that already exists
-in the same company, the operation is rejected with an error
-naming the conflicting number.
+Phone numbers are normalized to digits-only (stripping <code>+</code>,
+leading <code>00</code>, spaces, dashes, parentheses) and stored in
+an indexed field for duplicate detection.
 </p>
 
 <p>
-Bypassed automatically for system automation, bulk imports
-(<code>import_file</code> context), and external public/portal
-users. Configurable minimum length per company (default: 8 digits).
+When a contact is created or its phone field updated with a value
+already present in the same company, the operation is rejected with
+an error message identifying the conflicting number.
 </p>
+
+<p>The check is bypassed in the following scenarios:</p>
+
+<ul>
+  <li><code>env.su</code> (system automation, migrations, lead-to-contact sync)</li>
+  <li>Bulk imports via the standard Import Wizard
+      (<code>import_file</code> context)</li>
+  <li>Public users (anonymous self-signup visitors)</li>
+  <li>Portal users (external customers managing their own data)</li>
+  <li>Explicit <code>suite_skip_phone_check</code> context flag</li>
+</ul>
+
+<p>The minimum digit length is configurable per company. Default: 8.</p>
 
 <p style="text-align:center;">
     <img src="screenshot_phone_uniqueness.png"
@@ -57,23 +90,24 @@ users. Configurable minimum length per company (default: 8 digits).
 <h3>2. Contact field permissions</h3>
 
 <p>
-Once a contact has an assigned salesperson, their phone and email
-become private to that salesperson and to administrators.
-Contacts without a salesperson stay visible to all internal users
-&mdash; so anyone can pick up a new lead, but established customers
-are protected.
+Phone, email, and salesperson visibility are gated by role. Once a
+contact has an assigned salesperson, the phone and email fields
+become accessible only to the assigned salesperson and to
+administrators. Contacts without an assigned salesperson remain
+accessible to all internal users.
 </p>
 
 <p>
-The salesperson field itself is locked after creation:
-only Sales Manager / Contact Guard Admin can reassign customers
-between salespeople.
+The salesperson field can be set freely on contact creation
+(supporting CRM lead-to-contact conversion that carries the lead's
+salesperson). After creation, only Contact Guard Administrators can
+reassign the salesperson.
 </p>
 
 <p>
-Phone edit protection is enforced at the ORM layer, not just the
-view, so it applies to RPC, scripts, and automated actions in
-addition to the web UI.
+Phone edit protection is enforced at the ORM layer. The protection
+applies to all code paths including web UI, RPC calls, scripts, and
+automated actions.
 </p>
 
 <p style="text-align:center;">
@@ -85,24 +119,53 @@ addition to the web UI.
 <h3>3. Customer activity status</h3>
 
 <p>
-A daily cron computes each customer&apos;s activity status from
-their last confirmed sale order date:
+When enabled per company, a daily cron computes each customer's
+activity status from the date of their last confirmed sale order:
 </p>
 
-<ul>
-  <li><b>Active</b> &mdash; recent order, within warning threshold</li>
-  <li><b>Warning</b> (yellow) &mdash; past warning threshold,
-      time to follow up</li>
-  <li><b>Sleeping</b> (red) &mdash; past sleeping threshold,
-      losing them</li>
-  <li><b>Dormant</b> (muted) &mdash; past dormant threshold,
-      probably gone</li>
-</ul>
+<table style="width:100%; border-collapse:collapse; font-size:14px; margin: 1em 0;">
+  <tr style="background:#f5f5f5;">
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Status</th>
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Condition</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Active</td>
+    <td style="padding:8px; border:1px solid #ddd;">days since last order &lt; warning threshold</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Warning</td>
+    <td style="padding:8px; border:1px solid #ddd;">warning &le; days &lt; sleeping</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Sleeping</td>
+    <td style="padding:8px; border:1px solid #ddd;">sleeping &le; days &lt; dormant</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Dormant</td>
+    <td style="padding:8px; border:1px solid #ddd;">days &ge; dormant</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Blank</td>
+    <td style="padding:8px; border:1px solid #ddd;">no confirmed sale order on record</td>
+  </tr>
+</table>
 
 <p>
-Status appears on the contact form, on the contact list with
-colour decoration, and is available for filtering and grouping.
-Thresholds are configurable per company.
+The blank status is tracked via a separate <code>suite_has_orders</code>
+boolean so that "0 days since order" (just placed) and "never ordered"
+remain distinguishable in views.
+</p>
+
+<p>
+Thresholds are configurable per company. The status is displayed on
+the contact form (Activity Status tab) and the contact list (with
+colour decoration: yellow for Warning, red for Sleeping, muted grey
+for Dormant). It is available for filtering and grouping.
+</p>
+
+<p>
+The cron processes customers in batches of 1000 with chatter
+notifications suppressed.
 </p>
 
 <p style="text-align:center;">
@@ -113,61 +176,63 @@ Thresholds are configurable per company.
 
 <hr/>
 
-<h2>Why this works without breaking your sales workflow</h2>
+<h2>Permissions</h2>
+
+<h3>Roles</h3>
+
+<table style="width:100%; border-collapse:collapse; font-size:14px; margin: 1em 0;">
+  <tr style="background:#f5f5f5;">
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Role</th>
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Group</th>
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Source</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Contact Guard Administrator</td>
+    <td style="padding:8px; border:1px solid #ddd;"><code>suite_contact_guard.group_contact_guard_admin</code></td>
+    <td style="padding:8px; border:1px solid #ddd;">Added by this module</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Sales Manager</td>
+    <td style="padding:8px; border:1px solid #ddd;"><code>sales_team.group_sale_manager</code></td>
+    <td style="padding:8px; border:1px solid #ddd;">Native; implies Contact Guard Admin</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Contact Manager</td>
+    <td style="padding:8px; border:1px solid #ddd;"><code>base.group_partner_manager</code></td>
+    <td style="padding:8px; border:1px solid #ddd;">Native</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Purchase Manager</td>
+    <td style="padding:8px; border:1px solid #ddd;"><code>purchase.group_purchase_manager</code></td>
+    <td style="padding:8px; border:1px solid #ddd;">Native</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Purchase User</td>
+    <td style="padding:8px; border:1px solid #ddd;"><code>purchase.group_purchase_user</code></td>
+    <td style="padding:8px; border:1px solid #ddd;">Native</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Salesperson of the contact</td>
+    <td style="padding:8px; border:1px solid #ddd;"><code>partner.user_id == self.env.user</code></td>
+    <td style="padding:8px; border:1px solid #ddd;">Per-record relationship</td>
+  </tr>
+</table>
 
 <p>
-Most &quot;private contacts&quot; modules on the Apps Store and most
-forum answers tell you to add a record rule on <code>res.partner</code>
-like <code>[(&apos;user_id&apos;, &apos;=&apos;, user.id)]</code>.
-We tried that route first and abandoned it.
+The Sales Manager group implies Contact Guard Administrator (one-way
+implication). Granting Contact Guard Administrator alone does not
+grant Sales Manager privileges. This allows assigning Contact Guard
+Administrator to roles outside the sales hierarchy without granting
+Sales Manager privileges.
 </p>
 
-<p>
-<code>res.partner</code> is the central reference hub of Odoo.
-The moment you tighten read access on it with a record rule,
-every place that <i>implicitly</i> loads a related partner can fail
-with <code>AccessError</code>:
-</p>
-
-<ul>
-  <li>Salespeople cannot open their own quotations
-      (<code>partner_invoice_id</code> / <code>partner_shipping_id</code>
-      access denied)</li>
-  <li>Login fails because <code>res.users</code> reverse-references
-      the user&apos;s own partner record</li>
-  <li>Chatter, followers, activities throw
-      &quot;Implicitly accessed through Users&quot; errors</li>
-  <li>Multi-company partners (companion partners of
-      <code>res.company</code>) become invisible and break warehouse
-      and journal routing</li>
-</ul>
-
-<p>
-Existing solutions to these errors are all unpleasant: edit the
-built-in private-employee record rule, split internal users into
-two parallel groups, add a chain of <code>OR</code> clauses for every
-new edge case. Every workaround leaks. Odoo itself removed the
-original <code>res.partner.rule.private</code> rule in version 17
-because the design caused too many regressions.
-</p>
-
-<p>
-<b>Contact Guard takes a different stance.</b> Contact records stay
-fully visible to all internal users &mdash; quotations open,
-chatter loads, login works. Phone, email, and salesperson are
-the things you actually want to protect, and those are gated
-through field-level groups, ORM write hooks, and view-level groups.
-</p>
-
-<hr/>
-
-<h2>Who can do what</h2>
+<h3>Permission matrix</h3>
 
 <p>
 In the table below, <i>Salesperson</i> means the user assigned as
 salesperson on that specific contact. <i>SM/CGA</i> means Sales
-Manager or Contact Guard Admin (Sales Manager automatically implies
-Contact Guard Admin, so they are equivalent for these checks).
+Manager or Contact Guard Administrator (equivalent for Contact Guard
+operations).
 </p>
 
 <table style="width:100%; border-collapse:collapse; font-size:14px; margin: 1em 0;">
@@ -253,47 +318,253 @@ Contact Guard Admin, so they are equivalent for these checks).
   </tr>
 </table>
 
+<h3>Enforcement layers</h3>
+
+<p>The module enforces these rules at three layers:</p>
+
+<ol>
+  <li><b>ORM layer</b> &mdash; Phone edit protection and salesperson
+      change protection are enforced in <code>res.partner.write</code>.
+      Applies to web UI, RPC, scripts, and automated actions.
+      Bypassed only by <code>env.su</code>, <code>import_file</code>
+      context, <code>suite_skip_phone_check</code> context, or for
+      public/portal users.</li>
+  <li><b>Field-level <code>groups=</code></b> &mdash; Activity Status
+      fields (<code>suite_last_order_date</code>,
+      <code>suite_days_since_order</code>,
+      <code>suite_activity_status</code>,
+      <code>suite_has_orders</code>) carry <code>groups=</code> on
+      the model. The ORM strips them from <code>search_read</code>,
+      <code>read</code>, exports, and API calls for unauthorized
+      users.</li>
+  <li><b>View-level <code>groups=</code></b> &mdash; List columns,
+      kanban card sections, and form pages with <code>groups=</code>
+      are removed from the view arch on the server before being sent
+      to the client.</li>
+</ol>
+
+<hr/>
+
+<h2>Implementation notes</h2>
+
+<h3>Form-level visibility: scope and limitation</h3>
+
+<p>
+Phone and email visibility on the contact <b>form</b> is controlled
+by an <code>invisible=</code> expression rather than field-level
+<code>groups=</code>. This is a deliberate design choice. The native
+Odoo <code>phone</code> and <code>email</code> fields do not carry
+model-level <code>groups</code>, and adding model-level
+<code>groups</code> to them would break compatibility with every
+other module that reads these fields (CRM, Sales, Accounting,
+WhatsApp, etc.).
+</p>
+
+<p>The practical implication:</p>
+
+<ul>
+  <li>The <b>list and kanban</b> views use field-level
+      <code>groups=</code> on the column, which strip data on the
+      server side. Column-level hiding is data-tight.</li>
+  <li>The <b>form</b> view uses <code>invisible=</code>. The field
+      values are sent to the client and hidden by the UI. A
+      technically capable user (browser DevTools, custom RPC client)
+      can read the values.</li>
+</ul>
+
+<p>
+Deployments requiring data-tight protection on the form must use
+record rules instead of this module. The trade-off is documented in
+the next section.
+</p>
+
+<h3>Comparison: field-level approach vs record rules on res.partner</h3>
+
+<p>
+Two technical approaches can implement contact privacy in Odoo:
+restricting record visibility via <code>ir.rule</code> on
+<code>res.partner</code>, or restricting field visibility via
+field-level <code>groups=</code> and ORM hooks. This module uses the
+latter. The comparison documents the technical differences.
+</p>
+
+<table style="width:100%; border-collapse:collapse; font-size:13px; margin: 1em 0;">
+  <tr style="background:#f5f5f5;">
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Aspect</th>
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Record rule on res.partner</th>
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Field-level + ORM hooks (this module)</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Phone/email column hiding in lists and kanban</td>
+    <td style="padding:8px; border:1px solid #ddd;">Yes</td>
+    <td style="padding:8px; border:1px solid #ddd;">Yes (server-side stripping via field <code>groups=</code>)</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Phone/email value hiding on form</td>
+    <td style="padding:8px; border:1px solid #ddd;">Data-tight (record not loaded)</td>
+    <td style="padding:8px; border:1px solid #ddd;">UI-level via <code>invisible=</code></td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Salesperson opens own quotation referencing partner</td>
+    <td style="padding:8px; border:1px solid #ddd;">Requires <code>OR</code> clauses on <code>partner_invoice_id</code>, <code>partner_shipping_id</code></td>
+    <td style="padding:8px; border:1px solid #ddd;">Works without modification</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">User login (<code>res.users</code> self-reference)</td>
+    <td style="padding:8px; border:1px solid #ddd;">Requires explicit self-reference carve-out</td>
+    <td style="padding:8px; border:1px solid #ddd;">Works without modification</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Multi-company partner (companion of <code>res.company</code>)</td>
+    <td style="padding:8px; border:1px solid #ddd;">Requires explicit <code>OR</code> clause</td>
+    <td style="padding:8px; border:1px solid #ddd;">Works without modification</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Chatter, followers, activity assignment on partner-related records</td>
+    <td style="padding:8px; border:1px solid #ddd;">Requires carve-outs to prevent <code>Implicitly accessed through 'Users'</code> errors</td>
+    <td style="padding:8px; border:1px solid #ddd;">Works without modification</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Cross-team partner access (Accounting, Warehouse, Purchase, HR)</td>
+    <td style="padding:8px; border:1px solid #ddd;">Restricted to record owners; each cross-team workflow requires per-team carve-outs</td>
+    <td style="padding:8px; border:1px solid #ddd;">Unrestricted; partner records remain readable while phone/email/salesperson are gated by role</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Maintenance after Odoo upgrades or new module installation</td>
+    <td style="padding:8px; border:1px solid #ddd;">Carve-outs may require re-validation when related models add new partner references</td>
+    <td style="padding:8px; border:1px solid #ddd;">Stable; relies on Odoo APIs (<code>groups=</code>, <code>invisible=</code>, write hooks) that have remained stable across versions</td>
+  </tr>
+</table>
+
+<h3>Cross-team partner access</h3>
+
+<p>
+In typical Odoo deployments, the partner record is referenced by
+multiple modules:
+</p>
+
+<ul>
+  <li><b>Accounting</b> &mdash; invoice addresses, payment partners,
+      bank account holders</li>
+  <li><b>Warehouse / Inventory</b> &mdash; delivery addresses, vendor
+      records on incoming transfers</li>
+  <li><b>Purchase</b> &mdash; vendor records on purchase orders and
+      bills</li>
+  <li><b>HR</b> &mdash; employee records and related contacts</li>
+  <li><b>CRM</b> &mdash; lead and opportunity partners</li>
+</ul>
+
+<p>
+The field-level approach used in this module preserves cross-team
+partner access. Accounting users continue to access invoice
+addresses. Warehouse users continue to access delivery addresses.
+Purchase users continue to access vendor records. The protected
+fields &mdash; phone, email, salesperson &mdash; are gated by role
+independently of partner record access.
+</p>
+
+<h3>Multi-company company_id default</h3>
+
+<p>
+In native Odoo, the <code>company_id</code> field on the contact
+form is hidden from single-company users, and Odoo defaults it to
+blank, which makes the contact globally visible across companies.
+</p>
+
+<p>
+This module injects the user's active company as the default
+<code>company_id</code> on contact creation, so single-company
+deployments get the same per-company scoping that multi-company
+deployments configure manually.
+</p>
+
+<p>
+The injection is suppressed when the contact is being auto-created
+as the companion partner of a new <code>res.company</code>. In that
+case, Odoo's native flow assigns the correct company id, and the
+injection would otherwise overwrite it with the current active
+company's id, breaking downstream routing for the new company.
+</p>
+
 <hr/>
 
 <h2>Configuration</h2>
 
 <p>
-Contact Guard configures per company under
-<b>Contacts -&gt; Configuration -&gt; Contact Guard</b>
+Configuration is located at
+<b>Contacts &rarr; Configuration &rarr; Contact Guard</b>
 (visible to System Administrators).
 </p>
 
 <p>
-<b>Important:</b> the protection features are on by default and
-do not require a configuration record. Phone uniqueness, field
-permissions, and salesperson lock start working the moment you
-install the module. Configuration only lets you tune parameters
-(such as the minimum phone length) or opt in to the activity
-tracking cron.
+Protection features are active by default and do not require a
+configuration record. Phone uniqueness, field permissions, and
+salesperson lock activate when the module is installed.
+Configuration is only required to tune parameters or enable
+activity tracking.
 </p>
 
 <table style="width:100%; border-collapse:collapse; font-size:14px; margin: 1em 0;">
   <tr style="background:#f5f5f5;">
     <th style="text-align:left; padding:8px; border:1px solid #ddd;">Feature</th>
     <th style="padding:8px; border:1px solid #ddd;">Default state</th>
-    <th style="padding:8px; border:1px solid #ddd;">What configuration changes</th>
+    <th style="padding:8px; border:1px solid #ddd;">Configurable parameters</th>
   </tr>
   <tr>
     <td style="padding:8px; border:1px solid #ddd;">Phone uniqueness</td>
     <td style="text-align:center; padding:8px; border:1px solid #ddd;">On</td>
-    <td style="padding:8px; border:1px solid #ddd;">Adjusts the minimum digit count (default 8)</td>
+    <td style="padding:8px; border:1px solid #ddd;">Minimum digit count (default 8)</td>
   </tr>
   <tr>
     <td style="padding:8px; border:1px solid #ddd;">Field permissions (phone / email / salesperson)</td>
     <td style="text-align:center; padding:8px; border:1px solid #ddd;">On</td>
-    <td style="padding:8px; border:1px solid #ddd;">No configuration; behaviour is fixed by role</td>
+    <td style="padding:8px; border:1px solid #ddd;">None; behaviour is fixed by role</td>
   </tr>
   <tr>
     <td style="padding:8px; border:1px solid #ddd;">Customer activity status</td>
     <td style="text-align:center; padding:8px; border:1px solid #ddd;">Off</td>
-    <td style="padding:8px; border:1px solid #ddd;">Enables the daily cron and sets Warning / Sleeping / Dormant thresholds</td>
+    <td style="padding:8px; border:1px solid #ddd;">Enable cron, Warning / Sleeping / Dormant thresholds</td>
   </tr>
 </table>
+
+<p>Per-company settings:</p>
+
+<table style="width:100%; border-collapse:collapse; font-size:14px; margin: 1em 0;">
+  <tr style="background:#f5f5f5;">
+    <th style="text-align:left; padding:8px; border:1px solid #ddd;">Setting</th>
+    <th style="padding:8px; border:1px solid #ddd;">Default</th>
+    <th style="padding:8px; border:1px solid #ddd;">Description</th>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Phone Min Length</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">8</td>
+    <td style="padding:8px; border:1px solid #ddd;">Minimum digit count after normalization</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Track Customer Activity</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">Off</td>
+    <td style="padding:8px; border:1px solid #ddd;">Enables the daily activity cron for the company</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Warning after (days)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">30</td>
+    <td style="padding:8px; border:1px solid #ddd;">Threshold for Warning status</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Sleeping after (days)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">60</td>
+    <td style="padding:8px; border:1px solid #ddd;">Threshold for Sleeping status</td>
+  </tr>
+  <tr>
+    <td style="padding:8px; border:1px solid #ddd;">Dormant after (days)</td>
+    <td style="text-align:center; padding:8px; border:1px solid #ddd;">90</td>
+    <td style="padding:8px; border:1px solid #ddd;">Threshold for Dormant status</td>
+  </tr>
+</table>
+
+<p>
+Thresholds must satisfy <code>0 &lt; warning &lt; sleeping &lt; dormant</code>.
+</p>
 
 <p style="text-align:center;">
     <img src="screenshot_configuration.png"
@@ -310,30 +581,19 @@ tracking cron.
   <li>Multi-company aware: every check and configuration is scoped
       per company</li>
   <li>No database-level constraints; enforcement at the ORM, field,
-      or view layer depending on the rule</li>
-  <li>Depends only on standard Odoo modules: <code>contacts</code>,
-      <code>mail</code>, <code>sales_team</code>,
-      <code>sale</code>, <code>purchase</code></li>
+      or view layer</li>
+  <li>Dependencies: <code>contacts</code>, <code>mail</code>,
+      <code>sales_team</code>, <code>sale</code>,
+      <code>purchase</code> (all standard Odoo modules)</li>
 </ul>
 
 <hr/>
 
-<h2>About SuiteState</h2>
+<h2>License and contact</h2>
 
 <p>
-We built and use Contact Guard ourselves at SuiteState across
-multiple businesses. We open-sourced it under LGPL-3 because
-the pain is universal.
-</p>
-
-<p>
-SuiteState publishes a growing collection of focused, production-tested
-Odoo modules under the <i>Guard</i> series (Contact Guard, with
-Data Guard, Cost Guard, and Sale Price Guard following).
-Every module is independent &mdash; install only what you need.
-</p>
-
-<p>
-GitHub: <a href="https://github.com/SuiteState/community">github.com/SuiteState/community</a><br/>
-Website: <a href="https://suitestate.com">suitestate.com</a>
+Released under <b>LGPL-3.0</b>. Maintained by SuiteState.
+Source repository:
+<a href="https://github.com/SuiteState/community">github.com/SuiteState/community</a>.
+Website: <a href="https://suitestate.com">suitestate.com</a>.
 </p>
