@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Action and menu re-exposing native Landed Cost views under
+        Accounting -> Operations for the Accounting Stock History
+        group. The native form / list views are reused as-is to
+        avoid duplication; only the entry point is added.
+    -->
+
+    <record id="action_suite_landed_cost_acct"
+            model="ir.actions.act_window">
+        <field name="name">Landed Costs</field>
+        <field name="res_model">stock.landed.cost</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="group_ids"
+               eval="[(4, ref('suite_inventory_access.suite_group_accounting_stock_history'))]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No landed cost adjustments yet.
+            </p>
+            <p>
+                Create a landed cost record to allocate freight,
+                customs, handling and other ancillary costs into
+                inventory valuation.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_suite_landed_cost_acct"
+              name="Landed Costs"
+              parent="account.menu_finance_payables"
+              action="action_suite_landed_cost_acct"
+              sequence="999"/>
+
+</odoo>

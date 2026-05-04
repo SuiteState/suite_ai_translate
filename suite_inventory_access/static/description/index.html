@@ -1,0 +1,169 @@
+<h1 style="text-align:center;">Inventory Access Control for Sales and Accounting</h1>
+<h3 style="text-align:center; font-weight:normal; color:#666;">Stock visibility and stock-move history without granting full Inventory user rights</h3>
+
+<p style="text-align:center;">
+    <img src="screenshort_quant.png"
+         alt="Stock by location view for sales reps with warehouse access control in Odoo 19"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<hr/>
+
+<h2>Overview</h2>
+<p>
+    Native Odoo couples inventory data visibility to the
+    <code>stock.group_stock_user</code> role, which also grants
+    access to receipts, transfers, scrap, and stocktake operations.
+    This module adds two independent permission groups that each
+    expose a read-only data surface with a dedicated menu, without
+    unlocking any of Inventory's operational screens.
+</p>
+<ul>
+    <li><strong>Sales Stock Viewer</strong> &mdash; read-only access
+        to current on-hand quantities by location.</li>
+    <li><strong>Accounting Stock History</strong> &mdash; read-only
+        access to stock-move history, with a built-in consignment
+        filter.</li>
+</ul>
+
+<hr/>
+
+<h2>Functionality</h2>
+
+<h3>Sales Stock Viewer</h3>
+<p>
+    Grants read-only access to <code>stock.quant</code>,
+    <code>stock.location</code>, <code>stock.warehouse</code>,
+    and <code>stock.lot</code>. Adds a <strong>Stock View</strong>
+    menu under the Sales app showing current on-hand quantities
+    grouped by location. The view filters to internal locations
+    with positive on-hand by default.
+</p>
+<p>
+    Owner and Lot/Serial columns auto-hide when the corresponding
+    Odoo features (consignment tracking, lot tracking) are not
+    enabled. The On Hand quantity column is also added to the
+    product variants list for users in this group.
+</p>
+
+<h3>Accounting Stock History</h3>
+<p>
+    Grants read-only access to <code>stock.move</code>,
+    <code>stock.move.line</code>, <code>stock.location</code>,
+    <code>stock.warehouse</code>, <code>stock.lot</code>, and
+    <code>stock.picking.type</code>. Adds a <strong>Consignment
+    Moves</strong> menu under Accounting with a read-only
+    history list.
+</p>
+<p>
+    A built-in <strong>Consignment Only</strong> filter matches
+    moves whose underlying move lines carry an owner, for reviewing
+    vendor-owned inbound and outbound flow. An Owner(s) column
+    displays the consigning vendors on each move.
+</p>
+
+<p style="text-align:center;">
+    <img src="screenshort_setting.png"
+         alt="User form with inventory access control groups and per-user location restriction settings"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<h3>Per-user location restriction</h3>
+<p>
+    A new <strong>Accessible Locations</strong> field on the user
+    form allows administrators to scope each user to a subset of
+    stock locations. When left empty, the user sees all locations
+    in their companies. Selecting a parent location automatically
+    includes all of its children.
+</p>
+<p>
+    The restriction is enforced via record rules and applies to
+    both groups. System administrators are exempt.
+</p>
+
+<hr/>
+
+<h2>Permissions</h2>
+
+<table style="width:100%; border-collapse:collapse; font-size:14px; margin:1em 0;">
+    <tr style="background:#f5f5f5;">
+        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Group</th>
+        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Location</th>
+        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Access granted</th>
+    </tr>
+    <tr>
+        <td style="padding:8px; border:1px solid #ddd;">Sales Stock Viewer</td>
+        <td style="padding:8px; border:1px solid #ddd;">User form, Sales privilege</td>
+        <td style="padding:8px; border:1px solid #ddd;">Read on quant / location / warehouse / lot; Sales &rarr; Stock View menu; On Hand on product variants list</td>
+    </tr>
+    <tr>
+        <td style="padding:8px; border:1px solid #ddd;">Accounting Stock History</td>
+        <td style="padding:8px; border:1px solid #ddd;">User form, Accounting privilege</td>
+        <td style="padding:8px; border:1px solid #ddd;">Read on move / move-line / location / warehouse / lot / picking-type; Accounting &rarr; Consignment Moves menu</td>
+    </tr>
+</table>
+
+<p>
+    Neither group implies any other group. They are assigned
+    alongside the user's existing Sales or Accounting roles.
+</p>
+
+<hr/>
+
+<h2>Scope</h2>
+
+<h3>Covered</h3>
+<ul>
+    <li>Read-only stock-quant and stock-move access via independent groups</li>
+    <li>Dedicated menus under Sales and Accounting</li>
+    <li>Per-user location restriction (Many2many on <code>res.users</code>)</li>
+    <li>Consignment-only filtering on stock moves</li>
+    <li>On Hand column on product variants list (group-restricted)</li>
+    <li>Multi-company and multi-warehouse environments</li>
+    <li>Works with lot tracking and consignment tracking on or off</li>
+</ul>
+
+<h3>Not in scope</h3>
+<ul>
+    <li>Write access to inventory data (this module is read-only by design).</li>
+    <li>Landed cost access &mdash; handled by the companion module
+        <code>suite_inventory_access_landed_cost</code>, which
+        auto-installs when <code>stock_landed_costs</code> is present.</li>
+    <li>Per-department or per-team location grants (restriction is per-user only).</li>
+</ul>
+
+<hr/>
+
+<h2>Companion module</h2>
+<p>
+    <strong>Inventory Access &mdash; Landed Cost (Bridge)</strong>
+    (<code>suite_inventory_access_landed_cost</code>) auto-installs
+    when both this module and <code>stock_landed_costs</code> are
+    present. It adds landed cost RWCD access and an Accounting menu
+    for the Stock History group. Available separately on the Apps
+    Store.
+</p>
+
+<hr/>
+
+<h2>Requirements</h2>
+<ul>
+    <li><strong>Odoo 19.0</strong> (Community or Enterprise).</li>
+    <li>Depends on: <code>stock</code>, <code>sales_team</code>,
+        <code>account</code>.</li>
+</ul>
+
+<hr/>
+
+<h2>License &amp; support</h2>
+<p>
+    Released under the <strong>GNU Lesser General Public License v3</strong>
+    (LGPL-3.0-or-later). The full license text is included in the
+    <code>LICENSE</code> file shipped with the module.
+</p>
+<p>
+    Maintained by <strong>SuiteState</strong>. For questions, bug
+    reports, or feature requests, visit
+    <a href="https://suitestate.com">suitestate.com</a> or contact
+    <code>hello@suitestate.com</code>.
+</p>

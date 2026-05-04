@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Sales menu: "Stock View" under Sales -> Products.
+        Action access is gated by suite_group_sales_stock_viewer;
+        the menu inherits visibility from its action.
+    -->
+
+    <menuitem id="menu_suite_sales_stock_view"
+              name="Stock View"
+              parent="sale.product_menu_catalog"
+              action="action_suite_stock_quant_sales_viewer"
+              sequence="90"/>
+
+    <!--
+        Accounting menu: "Consignment Moves" under Customers.
+        Action gated by suite_group_accounting_stock_history.
+    -->
+
+    <menuitem id="menu_suite_accounting_stock_history"
+              name="Consignment Moves"
+              parent="account.menu_finance_receivables"
+              action="action_suite_stock_move_acct_history"
+              sequence="200"/>
+
+</odoo>

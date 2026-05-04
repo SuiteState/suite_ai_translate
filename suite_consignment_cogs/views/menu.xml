@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Menu placement: under Accounting > Customers, after the standard
+        invoicing entries. Adjust parent_id if a different placement is
+        preferred during review.
+    -->
+    <menuitem id="menu_suite_consignment_cogs_line"
+              name="Consignment Settlement"
+              parent="account.menu_finance_receivables"
+              action="action_suite_consignment_cogs_line"
+              sequence="100"/>
+
+</odoo>

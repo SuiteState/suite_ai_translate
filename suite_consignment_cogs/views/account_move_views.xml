@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Customer invoice form: notebook tab listing the consignment
+        ledger rows generated for this invoice. Read-only; cross-jump
+        to vendor bill via the bill_id field.
+    -->
+    <record id="view_account_move_form_consignment_customer"
+            model="ir.ui.view">
+        <field name="name">account.move.form.consignment.customer</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Consignment Lines"
+                      name="suite_consignment_lines"
+                      invisible="not suite_has_consigned or move_type not in ('out_invoice', 'out_refund')">
+                    <field name="suite_has_consigned" invisible="1"/>
+                    <field name="suite_consignment_pending" invisible="1"/>
+                    <field name="suite_consignment_cogs_line_ids"
+                           readonly="1">
+                        <list>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="owner_id"/>
+                            <field name="bill_id"/>
+                            <field name="product_cost"/>
+                            <field name="cost_subtotal"/>
+                            <field name="state" widget="badge"
+                                   decoration-warning="state == 'pending'"
+                                   decoration-success="state == 'settled'"
+                                   decoration-muted="state == 'cancelled'"/>
+                            <field name="currency_id"
+                                   column_invisible="1"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Settled Consignment Lines"
+                      name="suite_settled_consignment_lines"
+                      invisible="not suite_consignment_settled_line_ids or move_type not in ('in_invoice', 'in_refund')">
+                    <field name="suite_consignment_settled_line_ids"
+                           readonly="1">
+                        <list>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                            <field name="invoice_id"/>
+                            <field name="product_cost"/>
+                            <field name="cost_subtotal"/>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'settled'"
+                                   decoration-muted="state == 'cancelled'"/>
+                            <field name="currency_id"
+                                   column_invisible="1"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!--
+        Customer invoice list view: optional columns + row decoration
+        when consignment is pending settlement.
+    -->
+    <record id="view_account_move_out_invoice_list_consignment"
+            model="ir.ui.view">
+        <field name="name">account.move.list.out.invoice.consignment</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-warning"
+                           add="suite_consignment_pending"
+                           separator=" or "/>
+            </xpath>
+            <xpath expr="//list/field[1]" position="before">
+                <field name="suite_has_consigned" optional="hide"/>
+                <field name="suite_consignment_pending" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

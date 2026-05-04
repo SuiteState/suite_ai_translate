@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Expose the On Hand quantity column on the product variant list
+        for Sales Stock Viewers. The native stock module gates this
+        column behind stock.group_stock_user; we duplicate it for
+        the sales viewer group so it appears without granting full
+        Inventory access.
+    -->
+
+    <record id="view_suite_product_product_tree_stock_viewer"
+            model="ir.ui.view">
+        <field name="name">product.product.list.inherit.suite_inventory_access</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='type']" position="after">
+                <field name="qty_available"
+                       invisible="not is_storable"
+                       string="On Hand"
+                       optional="show"
+                       decoration-danger="qty_available &lt; 0"
+                       decoration-warning="qty_available == 0"
+                       decoration-bf="1"
+                       groups="suite_inventory_access.suite_group_sales_stock_viewer"
+                       sum="Total On Hand"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

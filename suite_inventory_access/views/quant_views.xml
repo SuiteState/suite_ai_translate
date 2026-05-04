@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Standalone quant views for the Sales Stock Viewer.
+
+        Built from scratch rather than inheriting native stock.quant
+        views to avoid pulling in the cross-jump buttons that the
+        Inventory app attaches to its own quant views (replenish,
+        scrap, transfer, etc).
+
+        owner_id and lot_id columns are guarded with the standard
+        stock groups so they only appear when the corresponding
+        feature (consignment / lots-and-serials) is enabled and the
+        user is a member of that group.
+    -->
+
+    <record id="view_suite_stock_quant_search" model="ir.ui.view">
+        <field name="name">suite.stock.quant.search</field>
+        <field name="model">stock.quant</field>
+        <field name="arch" type="xml">
+            <search string="Stock by Location">
+                <field name="product_id"/>
+                <field name="location_id"/>
+                <field name="warehouse_id"/>
+                <field name="lot_id"
+                       groups="stock.group_production_lot"/>
+                <field name="owner_id"
+                       groups="stock.group_tracking_owner"/>
+                <separator/>
+                <filter name="filter_internal_only"
+                        string="Internal Locations Only"
+                        domain="[('location_id.usage', '=', 'internal')]"/>
+                <filter name="filter_positive_qty"
+                        string="On Hand &gt; 0"
+                        domain="[('quantity', '&gt;', 0)]"/>
+                <filter name="filter_consigned"
+                        string="Consigned (Vendor-Owned)"
+                        domain="[('owner_id', '!=', False)]"
+                        groups="stock.group_tracking_owner"/>
+                <separator/>
+                <group>
+                    <filter name="group_location"
+                            string="Location"
+                            context="{'group_by': 'location_id'}"/>
+                    <filter name="group_warehouse"
+                            string="Warehouse"
+                            context="{'group_by': 'warehouse_id'}"/>
+                    <filter name="group_product"
+                            string="Product"
+                            context="{'group_by': 'product_id'}"/>
+                    <filter name="group_owner"
+                            string="Owner"
+                            context="{'group_by': 'owner_id'}"
+                            groups="stock.group_tracking_owner"/>
+                    <filter name="group_lot"
+                            string="Lot/Serial"
+                            context="{'group_by': 'lot_id'}"
+                            groups="stock.group_production_lot"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_suite_stock_quant_list" model="ir.ui.view">
+        <field name="name">suite.stock.quant.list</field>
+        <field name="model">stock.quant</field>
+        <field name="arch" type="xml">
+            <list string="Stock by Location"
+                  create="false" edit="false" delete="false" duplicate="false">
+                <field name="location_id"/>
+                <field name="warehouse_id" optional="show"/>
+                <field name="product_id"/>
+                <field name="lot_id"
+                       optional="show"
+                       groups="stock.group_production_lot"/>
+                <field name="owner_id"
+                       optional="show"
+                       groups="stock.group_tracking_owner"/>
+                <field name="reserved_quantity" optional="hide"
+                       sum="Reserved"/>
+                <field name="available_quantity" optional="show"
+                       sum="Available"/>
+                <field name="product_uom_id" optional="hide"/>
+                <field name="company_id" optional="hide"
+                       groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_suite_stock_quant_form" model="ir.ui.view">
+        <field name="name">suite.stock.quant.form</field>
+        <field name="model">stock.quant</field>
+        <field name="arch" type="xml">
+            <form string="Stock by Location"
+                  create="false" edit="false" delete="false" duplicate="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="location_id"/>
+                            <field name="warehouse_id"/>
+                            <field name="lot_id"
+                                   groups="stock.group_production_lot"/>
+                            <field name="owner_id"
+                                   groups="stock.group_tracking_owner"/>
+                        </group>
+                        <group>
+                            <field name="reserved_quantity"/>
+                            <field name="available_quantity"/>
+                            <field name="product_uom_id"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_suite_stock_quant_sales_viewer"
+            model="ir.actions.act_window">
+        <field name="name">Stock by Location</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('location_id.usage', '=', 'internal')]</field>
+        <field name="view_ids"
+               eval="[(5, 0, 0),
+                      (0, 0, {'view_mode': 'list',
+                              'view_id': ref('view_suite_stock_quant_list')}),
+                      (0, 0, {'view_mode': 'form',
+                              'view_id': ref('view_suite_stock_quant_form')})]"/>
+        <field name="search_view_id"
+               ref="view_suite_stock_quant_search"/>
+        <field name="context">
+            {'search_default_filter_internal_only': 1,
+             'search_default_filter_positive_qty': 1}
+        </field>
+        <field name="group_ids"
+               eval="[(4, ref('suite_group_sales_stock_viewer'))]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No stock matches the current filters.
+            </p>
+            <p>
+                This list shows current on-hand quantities across the
+                locations you have access to.
+            </p>
+        </field>
+    </record>
+
+</odoo>

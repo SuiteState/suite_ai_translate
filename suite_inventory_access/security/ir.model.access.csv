@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+suite_access_stock_quant_sales_viewer,sales.stock.viewer.quant.read,stock.model_stock_quant,suite_inventory_access.suite_group_sales_stock_viewer,1,0,0,0
+suite_access_stock_location_sales_viewer,sales.stock.viewer.location.read,stock.model_stock_location,suite_inventory_access.suite_group_sales_stock_viewer,1,0,0,0
+suite_access_stock_warehouse_sales_viewer,sales.stock.viewer.warehouse.read,stock.model_stock_warehouse,suite_inventory_access.suite_group_sales_stock_viewer,1,0,0,0
+suite_access_stock_lot_sales_viewer,sales.stock.viewer.lot.read,stock.model_stock_lot,suite_inventory_access.suite_group_sales_stock_viewer,1,0,0,0
+suite_access_stock_move_acct_history,acct.stock.history.move.read,stock.model_stock_move,suite_inventory_access.suite_group_accounting_stock_history,1,0,0,0
+suite_access_stock_move_line_acct_history,acct.stock.history.move.line.read,stock.model_stock_move_line,suite_inventory_access.suite_group_accounting_stock_history,1,0,0,0
+suite_access_stock_location_acct_history,acct.stock.history.location.read,stock.model_stock_location,suite_inventory_access.suite_group_accounting_stock_history,1,0,0,0
+suite_access_stock_warehouse_acct_history,acct.stock.history.warehouse.read,stock.model_stock_warehouse,suite_inventory_access.suite_group_accounting_stock_history,1,0,0,0
+suite_access_stock_lot_acct_history,acct.stock.history.lot.read,stock.model_stock_lot,suite_inventory_access.suite_group_accounting_stock_history,1,0,0,0
+suite_access_stock_picking_type_acct_history,acct.stock.history.picking.type.read,stock.model_stock_picking_type,suite_inventory_access.suite_group_accounting_stock_history,1,0,0,0

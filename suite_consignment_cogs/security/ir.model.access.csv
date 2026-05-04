@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_suite_consignment_cogs_line_invoice,suite.consignment.cogs.line invoice readonly,model_suite_consignment_cogs_line,account.group_account_invoice,1,0,0,0
+access_suite_consignment_cogs_line_user,suite.consignment.cogs.line user readwrite,model_suite_consignment_cogs_line,account.group_account_user,1,1,1,0
+access_suite_consignment_cogs_line_manager,suite.consignment.cogs.line manager full,model_suite_consignment_cogs_line,account.group_account_manager,1,1,1,1

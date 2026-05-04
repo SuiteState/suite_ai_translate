@@ -1,0 +1,169 @@
+<h1 style="text-align:center;">Consignment Settlement Ledger</h1>
+<h3 style="text-align:center; font-weight:normal; color:#666;">Line-level matching between consigned customer-invoice outbounds and vendor settlement bills</h3>
+
+<p style="text-align:center;">
+    <img src="suite_consignment_cogs_screenshot.png"
+         alt="Consignment settlement ledger matching customer invoices to vendor bills in Odoo 19"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<hr/>
+
+<h2>Overview</h2>
+<p>
+    Odoo's native consignment flow handles inventory valuation
+    correctly: vendor-owned stock contributes zero value at
+    delivery, so a customer invoice's COGS reflects only the
+    own-stock portion. The consigned cost is recognised separately
+    when the vendor's settlement bill is posted.
+</p>
+<p>
+    What is missing in native is the matching surface between those
+    two events. This module adds a per-line settlement ledger that
+    tracks each consigned outbound on a customer invoice and allows
+    accounting to match it to the corresponding vendor bill, with
+    status tracked automatically.
+</p>
+<p>
+    No configuration required. No new accounts created. The module
+    activates on installation and is silent for invoices that
+    contain no consigned stock.
+</p>
+
+<p style="text-align:center;">
+    <img src="suite_consignment_settlement.png"
+         alt="Consignment settlement ledger list with pending and settled status"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<hr/>
+
+<h2>Functionality</h2>
+
+<h3>Customer invoice posted</h3>
+<p>
+    For every invoice line that ships consigned stock, one ledger
+    row is created per (invoice line &times; consigning vendor)
+    combination, recording the outbound quantity in the invoice
+    line's UoM. A notebook tab on the customer invoice form lists
+    the settlement rows. A &ldquo;Consignment Pending&rdquo; flag
+    is set on the invoice.
+</p>
+
+<h3>Vendor settlement bill</h3>
+<p>
+    Accounting opens the settlement ledger from
+    <strong>Accounting &rarr; Customers &rarr; Consignment
+    Settlement</strong>, filters by vendor, pending status, or date
+    range, and assigns the <strong>Vendor Bill</strong> on each
+    row. The unit cost auto-fills from the first matching product
+    line on the bill and remains editable. Each settled row turns
+    green; the invoice's pending flag clears once all rows are
+    matched to a posted bill.
+</p>
+
+<h3>Customer credit note (returns)</h3>
+<p>
+    When a credit note is posted, the module creates proportional
+    negative-quantity copies of the original invoice's ledger rows,
+    anchored to the credit note. Each reverse row carries a link
+    back to the originating row for traceability.
+</p>
+
+<hr/>
+
+<h2>Workflow</h2>
+<ol>
+    <li>Receive vendor-owned stock with an owner on the receipt
+        move (standard Odoo consignment flow).</li>
+    <li>Sell mixed (own + consigned) units to a customer. Confirm
+        and deliver.</li>
+    <li>Post the customer invoice. Ledger rows are created
+        automatically for the consigned portion.</li>
+    <li>Create the vendor settlement bill through the standard
+        vendor bill flow.</li>
+    <li>Open the settlement ledger, assign the Vendor Bill on each
+        row, verify the auto-filled product cost.</li>
+    <li>For returns: post a customer credit note. Reverse ledger
+        rows are created. Match each to a vendor credit when it
+        arrives.</li>
+</ol>
+
+<hr/>
+
+<h2>Permissions</h2>
+<p>
+    The module reuses native Accounting groups. No new group is
+    added.
+</p>
+
+<table style="width:100%; border-collapse:collapse; font-size:14px; margin:1em 0;">
+    <tr style="background:#f5f5f5;">
+        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Group</th>
+        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Access on settlement ledger</th>
+    </tr>
+    <tr>
+        <td style="padding:8px; border:1px solid #ddd;">Invoicing (<code>account.group_account_invoice</code>)</td>
+        <td style="padding:8px; border:1px solid #ddd;">Read</td>
+    </tr>
+    <tr>
+        <td style="padding:8px; border:1px solid #ddd;">Accountant (<code>account.group_account_user</code>)</td>
+        <td style="padding:8px; border:1px solid #ddd;">Read / Write / Create</td>
+    </tr>
+    <tr>
+        <td style="padding:8px; border:1px solid #ddd;">Adviser (<code>account.group_account_manager</code>)</td>
+        <td style="padding:8px; border:1px solid #ddd;">Read / Write / Create / Delete</td>
+    </tr>
+</table>
+
+<hr/>
+
+<h2>Scope</h2>
+
+<h3>Covered</h3>
+<ul>
+    <li>Per-line settlement ledger on customer invoices with consigned stock</li>
+    <li>Vendor bill assignment and auto-filled product cost</li>
+    <li>Proportional reverse rows on customer credit notes</li>
+    <li>Pending / settled status tracking per row</li>
+    <li>Anglo-Saxon and Continental valuation methods</li>
+    <li>Multi-company and multi-currency</li>
+    <li>Pure-consigned and mixed (own + consigned) sales</li>
+</ul>
+
+<h3>Not in scope</h3>
+<ul>
+    <li>Outbound consignment (own stock placed at customer locations).</li>
+    <li>Splitting a single consigned outbound across multiple vendor bills.</li>
+    <li>Automatic accrual at invoice posting &mdash; consignment cost recognition
+        follows the vendor bill posting event.</li>
+    <li>A vendor-bill matching wizard. Settlement is performed by selecting
+        the bill on each ledger row.</li>
+</ul>
+
+<hr/>
+
+<h2>Compatibility</h2>
+<ul>
+    <li><strong>Odoo 19.0</strong> (Community and Enterprise).</li>
+    <li>Depends on: <code>mail</code>, <code>stock_account</code>,
+        <code>sale_stock</code>.</li>
+    <li>Works alongside <code>suite_inventory_access</code> for
+        cross-jumping from ledger rows to stock moves, but each
+        module is fully independent.</li>
+</ul>
+
+<hr/>
+
+<h2>License &amp; support</h2>
+<p>
+    Released under the <strong>GNU Lesser General Public License v3</strong>
+    (LGPL-3.0-or-later). The full license text is included in the
+    <code>LICENSE</code> file shipped with the module.
+</p>
+<p>
+    Maintained by <strong>SuiteState</strong>. For questions, bug
+    reports, or feature requests, visit
+    <a href="https://suitestate.com">suitestate.com</a> or contact
+    <code>hello@suitestate.com</code>.
+</p>

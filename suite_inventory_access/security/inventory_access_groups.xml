@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Two privileges keep the new groups visible in the user form
+        as standalone checkboxes, one under Sales and one under
+        Accounting, rather than being buried under Inventory.
+    -->
+
+    <record id="suite_privilege_sales_stock_visibility"
+            model="res.groups.privilege">
+        <field name="name">Stock Visibility</field>
+        <field name="category_id"
+               ref="base.module_category_sales"/>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="suite_privilege_accounting_stock_history"
+            model="res.groups.privilege">
+        <field name="name">Stock History</field>
+        <field name="category_id"
+               ref="base.module_category_accounting"/>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="suite_group_sales_stock_viewer" model="res.groups">
+        <field name="name">Stock Viewer</field>
+        <field name="privilege_id"
+               ref="suite_privilege_sales_stock_visibility"/>
+        <field name="comment">
+            Read-only access to current on-hand quantities by location.
+            Grants no inventory operation rights.
+        </field>
+    </record>
+
+    <record id="suite_group_accounting_stock_history" model="res.groups">
+        <field name="name">Stock History</field>
+        <field name="privilege_id"
+               ref="suite_privilege_accounting_stock_history"/>
+        <field name="comment">
+            Read-only access to stock-move history with a built-in
+            consignment filter. Grants no inventory operation rights.
+        </field>
+    </record>
+
+</odoo>

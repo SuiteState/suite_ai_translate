@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!--
+        Per-user location restriction.
+
+        Both groups share the same rule pattern: a user with at least
+        one entry in suite_accessible_location_ids only sees data from
+        those locations (and their children); a user with an empty list
+        sees everything within the companies they have access to.
+
+        The (1, '=', 1 or 0) trick toggles the OR clause: when the M2M
+        is empty the second branch is always-true, so the union covers
+        every record; when the M2M is populated the second branch is
+        always-false, so only the location_id-in-ids branch contributes.
+    -->
+
+    <!-- ============================================================ -->
+    <!-- stock.quant — sales viewer                                    -->
+    <!-- ============================================================ -->
+    <record id="rule_suite_quant_sales_viewer_company"
+            model="ir.rule">
+        <field name="name">Quant: company filter (sales viewer)</field>
+        <field name="model_id" ref="stock.model_stock_quant"/>
+        <field name="groups"
+               eval="[(4, ref('suite_group_sales_stock_viewer'))]"/>
+        <field name="domain_force">
+            ['|', ('company_id', 'in', company_ids),
+                  ('company_id', '=', False)]
+        </field>
+    </record>
+
+    <record id="rule_suite_quant_sales_viewer_locations"
+            model="ir.rule">
+        <field name="name">Quant: accessible locations (sales viewer)</field>
+        <field name="model_id" ref="stock.model_stock_quant"/>
+        <field name="groups"
+               eval="[(4, ref('suite_group_sales_stock_viewer'))]"/>
+        <field name="domain_force">
+            ['|',
+                ('location_id', 'child_of',
+                 user.suite_accessible_location_ids.ids),
+                (1, '=', 1 if not user.suite_accessible_location_ids else 0)]
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- stock.move — accounting history                               -->
+    <!-- ============================================================ -->
+    <record id="rule_suite_move_acct_history_company"
+            model="ir.rule">
+        <field name="name">Move: company filter (accounting history)</field>
+        <field name="model_id" ref="stock.model_stock_move"/>
+        <field name="groups"
+               eval="[(4, ref('suite_group_accounting_stock_history'))]"/>
+        <field name="domain_force">
+            ['|', ('company_id', 'in', company_ids),
+                  ('company_id', '=', False)]
+        </field>
+    </record>
+
+    <record id="rule_suite_move_acct_history_locations"
+            model="ir.rule">
+        <field name="name">Move: accessible locations (accounting history)</field>
+        <field name="model_id" ref="stock.model_stock_move"/>
+        <field name="groups"
+               eval="[(4, ref('suite_group_accounting_stock_history'))]"/>
+        <field name="domain_force">
+            ['|',
+                '|',
+                ('location_id', 'child_of',
+                 user.suite_accessible_location_ids.ids),
+                ('location_dest_id', 'child_of',
+                 user.suite_accessible_location_ids.ids),
+                (1, '=', 1 if not user.suite_accessible_location_ids else 0)]
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- stock.move.line — accounting history                          -->
+    <!-- ============================================================ -->
+    <record id="rule_suite_move_line_acct_history_company"
+            model="ir.rule">
+        <field name="name">Move line: company filter (accounting history)</field>
+        <field name="model_id" ref="stock.model_stock_move_line"/>
+        <field name="groups"
+               eval="[(4, ref('suite_group_accounting_stock_history'))]"/>
+        <field name="domain_force">
+            ['|', ('company_id', 'in', company_ids),
+                  ('company_id', '=', False)]
+        </field>
+    </record>
+
+    <record id="rule_suite_move_line_acct_history_locations"
+            model="ir.rule">
+        <field name="name">Move line: accessible locations (accounting history)</field>
+        <field name="model_id" ref="stock.model_stock_move_line"/>
+        <field name="groups"
+               eval="[(4, ref('suite_group_accounting_stock_history'))]"/>
+        <field name="domain_force">
+            ['|',
+                '|',
+                ('location_id', 'child_of',
+                 user.suite_accessible_location_ids.ids),
+                ('location_dest_id', 'child_of',
+                 user.suite_accessible_location_ids.ids),
+                (1, '=', 1 if not user.suite_accessible_location_ids else 0)]
+        </field>
+    </record>
+
+</odoo>
