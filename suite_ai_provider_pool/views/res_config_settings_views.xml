@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_suite_ai_provider_pool" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.suite_ai_provider_pool</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="ai_app.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='ai_providers']" position="inside">
+                <setting id="suite_anthropic_provider"
+                         string="Use your own Anthropic Claude account"
+                         help="Provide your API key to connect with your account"
+                         groups="base.group_system">
+                    <div class="flex-grow-1">
+                        <field name="suite_anthropic_key" placeholder="Key" password="True" nolabel="1" class="w-100"/>
+                    </div>
+                </setting>
+                <setting id="suite_deepseek_provider"
+                         string="Use your own DeepSeek account"
+                         help="Provide your API key to connect with your account"
+                         groups="base.group_system">
+                    <div class="flex-grow-1">
+                        <field name="suite_deepseek_key" placeholder="Key" password="True" nolabel="1" class="w-100"/>
+                    </div>
+                </setting>
+                <setting id="suite_selfhosted_provider"
+                         string="Connect a self-hosted LLM server"
+                         help="Run any open-source model on your own server (Ollama, vLLM, LM Studio) and use it from Odoo. OpenAI-compatible endpoints only."
+                         groups="base.group_system">
+                    <div class="content-group">
+                        <div class="row mt8">
+                            <label for="suite_selfhosted_url" class="col-lg-3 o_light_label"/>
+                            <field name="suite_selfhosted_url"
+                                   placeholder="http://localhost:11434"
+                                   class="col-lg-9"/>
+                        </div>
+                        <div class="row mt8">
+                            <label for="suite_selfhosted_key" class="col-lg-3 o_light_label"/>
+                            <field name="suite_selfhosted_key"
+                                   placeholder="Optional bearer token"
+                                   password="True"
+                                   class="col-lg-9"/>
+                        </div>
+                        <div class="row mt8">
+                            <label for="suite_selfhosted_models" class="col-lg-3 o_light_label"/>
+                            <field name="suite_selfhosted_models"
+                                   placeholder="qwen2.5:14b&#10;llama3.3:70b | Llama 3.3 70B"
+                                   class="col-lg-9"/>
+                        </div>
+                        <div class="mt8">
+                            <button name="action_suite_test_selfhosted_connection"
+                                    type="object"
+                                    string="Test Connection"
+                                    icon="fa-plug"
+                                    class="btn-secondary"/>
+                            <button name="action_suite_fetch_selfhosted_models"
+                                    type="object"
+                                    string="Fetch Available Models"
+                                    icon="fa-refresh"
+                                    class="btn-secondary"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

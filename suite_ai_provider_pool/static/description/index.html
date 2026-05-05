@@ -1,0 +1,148 @@
+<section>
+
+<h1 style="text-align:center;">AI Provider Pool: Claude, DeepSeek, Self-Hosted</h1>
+
+<h3 style="text-align:center; color:#555;">
+Adds Anthropic Claude, DeepSeek, and any self-hosted OpenAI-compatible
+LLM as native AI providers in Odoo 19 Enterprise.
+</h3>
+
+<img src="suite_ai_pool_screenshot.png"
+     style="width:100%; max-width:1920px; height:auto;"
+     alt="AI Provider Pool - Claude, DeepSeek, and self-hosted LLM providers for Odoo 19"/>
+
+<hr/>
+
+<h2>One install, three new providers</h2>
+
+<p>
+Odoo 19 Enterprise ships with OpenAI and Google Gemini as built-in
+AI providers. This module registers three additional providers into
+the same native framework, so they appear in the AI Agent model
+selector alongside the defaults &mdash; no patching, no wrapper,
+no separate configuration page.
+</p>
+
+<h3>Anthropic Claude</h3>
+<p>
+Full Messages API integration with tool calling. Supports Claude
+Opus, Sonnet, and Haiku models. API key configured per database
+in Settings &rarr; AI, or via the <code>ODOO_AI_ANTHROPIC_TOKEN</code>
+environment variable.
+</p>
+
+<h3>DeepSeek</h3>
+<p>
+Chat Completions API with function calling. Supports DeepSeek-Chat
+and DeepSeek-Reasoner models. API key configured per database or
+via <code>ODOO_AI_DEEPSEEK_TOKEN</code>.
+</p>
+
+<h3>Self-Hosted (OpenAI-compatible)</h3>
+<p>
+Any endpoint exposing <code>/v1/chat/completions</code> &mdash;
+Ollama, vLLM, LM Studio, HuggingFace TGI, or a custom deployment.
+Type <code>host:port</code> and the <code>/v1</code> suffix is
+added automatically. API key is optional, suitable for local
+installs without authentication.
+</p>
+
+<ul>
+    <li><strong>Fetch Available Models</strong> &mdash; one-click
+        discovery via <code>/v1/models</code> on the configured server.</li>
+    <li><strong>Test Connection</strong> &mdash; verifies reachability
+        before going live.</li>
+</ul>
+
+<hr/>
+
+<h2>Configuration</h2>
+
+<img src="screenshot_settings.png"
+     style="width:100%; max-width:1920px; height:auto;"
+     alt="AI Provider Pool settings page - API keys and self-hosted server configuration"/>
+
+<p>All provider settings live in <strong>Settings &rarr; AI</strong>,
+in the same section as the native OpenAI and Gemini providers:</p>
+
+<ul>
+    <li><strong>API keys</strong> &mdash; per database, stored as system
+        parameters. Also readable from environment variables for
+        containerized deployments.</li>
+    <li><strong>Self-Hosted URL</strong> &mdash; auto-completed from
+        <code>host:port</code> input.</li>
+    <li><strong>Custom model list</strong> &mdash; manually entered or
+        fetched from the server's <code>/v1/models</code> endpoint.</li>
+</ul>
+
+<p>Multi-company safe. Keys and URLs are stored as system parameters
+shared across companies.</p>
+
+<hr/>
+
+<h2>AI Agents with new providers</h2>
+
+<img src="screenshot_agents.png"
+     style="width:100%; max-width:1920px; height:auto;"
+     alt="AI Agent model selector showing Claude, DeepSeek and self-hosted models"/>
+
+<p>
+After installation, Claude, DeepSeek, and your self-hosted models
+appear directly in the AI Agent model selector. No additional
+configuration is needed beyond providing the API key or server URL.
+</p>
+
+<hr/>
+
+<h2>Scope and limitations</h2>
+
+<h3>Supported</h3>
+<ul>
+    <li>Chat completions with tool/function calling for all three
+        providers</li>
+    <li>AI Agent model selector &mdash; new models appear alongside
+        OpenAI and Gemini</li>
+    <li>Works with any module that consumes the native
+        <code>ai</code> framework (AI Translate, AI Customer
+        Service, etc.)</li>
+</ul>
+
+<h3>Not in scope</h3>
+<ul>
+    <li><strong>Embedding models.</strong> No embedding provider is
+        registered. RAG sources continue to use OpenAI or Gemini
+        embeddings.</li>
+    <li><strong>File attachments, structured output (JSON schema),
+        and web grounding</strong> &mdash; use OpenAI or Gemini for
+        those capabilities.</li>
+</ul>
+
+<hr/>
+
+<h2>Requirements</h2>
+<ul>
+    <li><strong>Odoo 19 Enterprise</strong> &mdash; depends on the
+        <code>ai_app</code> module.</li>
+    <li><strong>At least one API key</strong> for any of the three
+        providers, or a reachable self-hosted endpoint.</li>
+    <li><strong>Network egress</strong> from the Odoo server to
+        <code>api.anthropic.com</code>, <code>api.deepseek.com</code>,
+        or your self-hosted server.</li>
+</ul>
+
+<hr/>
+
+<h2>License &amp; support</h2>
+<p>
+Released under the <strong>GNU Lesser General Public License v3</strong>
+(LGPL-3.0-or-later). The full license text is included in the
+<code>LICENSE</code> file shipped with the module.
+</p>
+<p>
+Maintained by <strong>SuiteState</strong>. For questions, bug
+reports, or feature requests, visit
+<a href="https://suitestate.com">suitestate.com</a> or contact
+<code>hello@suitestate.com</code>.
+</p>
+
+</section>
