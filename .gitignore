@@ -79,3 +79,4 @@ htmlcov/
 # Local development
 /local/
 /custom/local/
+!*/data/
