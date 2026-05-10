@@ -88,6 +88,26 @@ class ResConfigSettings(models.TransientModel):
             "it overrides this value."
         ),
     )
+    suite_server_action_model = fields.Selection(
+        selection="_get_llm_model_selection",
+        string="AI Automation Model",
+        config_parameter="suite_ai_provider_pool.server_action_model",
+        help=(
+            "LLM model used by AI-powered server actions (automations, "
+            "document sorting, etc.). If empty, defaults to GPT-4.1 "
+            "(native Odoo behaviour). Set this to use Claude, DeepSeek, "
+            "or a self-hosted model for all AI automations."
+        ),
+    )
+
+    @api.model
+    def _get_llm_model_selection(self):
+        from odoo.addons.ai.utils.llm_providers import PROVIDERS
+        selection = []
+        for provider in PROVIDERS:
+            selection.extend(provider.llms)
+        return selection
+
     suite_selfhosted_models = fields.Text(
         string="Self-Hosted Custom Models",
         help=(

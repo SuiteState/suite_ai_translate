@@ -6,6 +6,14 @@
         <field name="inherit_id" ref="ai_app.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//block[@name='ai_providers']" position="inside">
+                <setting id="suite_server_action_model"
+                         string="AI Automation Model"
+                         help="LLM model used by AI-powered server actions, document sorting, and other automations. Defaults to GPT-4.1 if not set."
+                         groups="base.group_system">
+                    <div class="flex-grow-1">
+                        <field name="suite_server_action_model" nolabel="1" class="w-50"/>
+                    </div>
+                </setting>
                 <setting id="suite_anthropic_provider"
                          string="Use your own Anthropic Claude account"
                          help="Provide your API key to connect with your account"

@@ -1,6 +1,6 @@
 {
     "name": "AI Provider Pool: Claude, DeepSeek, Self-Hosted",
-    "summary": "Anthropic Claude, DeepSeek, Ollama, vLLM, LM Studio — add any LLM as a native Odoo 19 AI provider with tool calling, self-hosted OpenAI-compatible endpoint support, one-click model discovery.",
+    "summary": "Anthropic Claude, DeepSeek, Ollama, vLLM, LM Studio — add any LLM as a native Odoo 19 AI provider with tool calling, embedding fallback, AI automation model, self-hosted OpenAI-compatible endpoint, one-click model discovery.",
     "description": """
 Keywords: AI provider, Claude provider, DeepSeek provider, Ollama Odoo,
 vLLM Odoo, LM Studio, self-hosted LLM, OpenAI-compatible, AI agent model,
@@ -35,17 +35,35 @@ Configuration
 - A Test Connection button verifies reachability before going live.
 - Multi-company safe: keys and URLs are stored as system parameters.
 
+Embedding Fallback
+------------------
+Anthropic, DeepSeek, and self-hosted providers do not offer an
+embedding API. When an AI Agent uses one of these chat models and
+has Knowledge Sources attached, the module automatically falls back
+to an embedding provider that has a configured API key (OpenAI or
+Google). The user simply needs one embedding-capable key alongside
+their chat key. If neither is configured, a clear error message
+directs the user to Settings > AI.
+
+AI Automation Model
+-------------------
+Native Odoo 19 hardcodes OpenAI GPT-4.1 for all AI-powered server
+actions (document sorting, automations, etc.). This module adds a
+global "AI Automation Model" setting in Settings > AI, allowing
+administrators to use Claude, DeepSeek, or a self-hosted model for
+all AI automations.
+
 Limitations
 -----------
-- Chat only. No embedding model is registered. Retrieval-Augmented
-  Generation (RAG) sources continue to use OpenAI or Gemini embeddings,
-  even when an agent's chat model is Claude, DeepSeek or Self-Hosted.
 - File attachments, structured output (JSON schema) and web grounding
-  are not supported in this module. Use OpenAI or Gemini for those.
+  are not supported for the new providers. Use OpenAI or Gemini for
+  those capabilities.
+- AI Field Fill remains OpenAI-only due to Odoo's use of the
+  /responses endpoint, which other providers do not support yet.
 
 License: LGPL-3.
 """,
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.0",
     "category": "Productivity/AI",
     "license": "LGPL-3",
     "author": "SuiteState",

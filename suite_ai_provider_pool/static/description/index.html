@@ -4,12 +4,9 @@
 
 <h3 style="text-align:center; color:#555;">
 Adds Anthropic Claude, DeepSeek, and any self-hosted OpenAI-compatible
-LLM as native AI providers in Odoo 19 Enterprise.
+LLM as native AI providers in Odoo 19 Enterprise &mdash; with automatic
+embedding fallback and configurable AI automation model.
 </h3>
-
-<img src="suite_ai_pool_screenshot.png"
-     style="width:100%; max-width:1920px; height:auto;"
-     alt="AI Provider Pool - Claude, DeepSeek, and self-hosted LLM providers for Odoo 19"/>
 
 <hr/>
 
@@ -56,16 +53,103 @@ installs without authentication.
 
 <hr/>
 
+<h2>Automatic Embedding Fallback</h2>
+
+<p style="font-size:18px; color:#555;">
+Anthropic, DeepSeek, and self-hosted models do not provide embedding
+APIs. Without this module, selecting one of these models on an AI
+Agent and uploading a Knowledge Source would fail with an error.
+</p>
+
+<p>
+This module solves the problem transparently: when the agent's chat
+provider has no embedding capability, the module automatically falls
+back to any provider that has both an embedding model <strong>and</strong>
+a configured API key (OpenAI or Google).
+</p>
+
+<table style="width:100%; border-collapse:collapse; margin:16px 0;">
+    <thead>
+        <tr style="background:#f5f5f5;">
+            <th style="padding:10px 12px; text-align:left; border:1px solid #ddd;">Configuration</th>
+            <th style="padding:10px 12px; text-align:left; border:1px solid #ddd;">Chat (Agent conversation)</th>
+            <th style="padding:10px 12px; text-align:left; border:1px solid #ddd;">Embedding (Knowledge Sources)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude key + OpenAI key</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">OpenAI (automatic)</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude key + Google key</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Google (automatic)</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">DeepSeek key + OpenAI key</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">DeepSeek</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">OpenAI (automatic)</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude key only (no Source)</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Not needed</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude key only + Source upload</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Claude</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Clear error: add OpenAI or Google key</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>
+<strong>How it works:</strong> Embedding is not "reading" &mdash; it
+is a one-time conversion of your documents into numeric vectors for
+similarity search. When a user asks a question, the system searches
+for relevant document passages using the embedding provider, then
+passes those passages as plain text to your chosen chat model (Claude,
+DeepSeek, etc.) for the actual answer. 99% of the cost is on the
+chat model; embedding costs are negligible.
+</p>
+
+<hr/>
+
+<h2>AI Automation Model</h2>
+
+<p style="font-size:18px; color:#555;">
+Native Odoo 19 hardcodes OpenAI GPT-4.1 for all AI-powered server
+actions, regardless of which model you selected on your AI Agent.
+</p>
+
+<p>
+This module adds a global <strong>AI Automation Model</strong>
+setting in Settings &rarr; AI. Once set, all AI-powered automations
+&mdash; document sorting, automated actions, workflow triggers &mdash;
+use your preferred model instead of the hardcoded default.
+</p>
+
+<p>
+If left empty, the native GPT-4.1 default is preserved. You can
+switch at any time without restarting.
+</p>
+
+<hr/>
+
 <h2>Configuration</h2>
 
 <img src="screenshot_settings.png"
-     style="width:100%; max-width:1920px; height:auto;"
-     alt="AI Provider Pool settings page - API keys and self-hosted server configuration"/>
+     style="width:100%; max-width:1920px; height:auto; border-radius:4px;"
+     alt="AI Provider Pool settings page - API keys, automation model, and self-hosted server configuration"/>
 
 <p>All provider settings live in <strong>Settings &rarr; AI</strong>,
 in the same section as the native OpenAI and Gemini providers:</p>
 
 <ul>
+    <li><strong>AI Automation Model</strong> &mdash; choose which LLM
+        powers AI-driven server actions and automations.</li>
     <li><strong>API keys</strong> &mdash; per database, stored as system
         parameters. Also readable from environment variables for
         containerized deployments.</li>
@@ -83,7 +167,7 @@ shared across companies.</p>
 <h2>AI Agents with new providers</h2>
 
 <img src="screenshot_agents.png"
-     style="width:100%; max-width:1920px; height:auto;"
+     style="width:100%; max-width:1920px; height:auto; border-radius:4px;"
      alt="AI Agent model selector showing Claude, DeepSeek and self-hosted models"/>
 
 <p>
@@ -92,30 +176,72 @@ appear directly in the AI Agent model selector. No additional
 configuration is needed beyond providing the API key or server URL.
 </p>
 
+<p>
+Knowledge Sources (PDFs, documents, URLs) work with any chat model
+&mdash; embedding is handled automatically via the fallback mechanism
+described above.
+</p>
+
 <hr/>
 
-<h2>Scope and limitations</h2>
+<h2>What works with the new providers</h2>
 
-<h3>Supported</h3>
-<ul>
-    <li>Chat completions with tool/function calling for all three
-        providers</li>
-    <li>AI Agent model selector &mdash; new models appear alongside
-        OpenAI and Gemini</li>
-    <li>Works with any module that consumes the native
-        <code>ai</code> framework (AI Translate, AI Customer
-        Service, etc.)</li>
-</ul>
-
-<h3>Not in scope</h3>
-<ul>
-    <li><strong>Embedding models.</strong> No embedding provider is
-        registered. RAG sources continue to use OpenAI or Gemini
-        embeddings.</li>
-    <li><strong>File attachments, structured output (JSON schema),
-        and web grounding</strong> &mdash; use OpenAI or Gemini for
-        those capabilities.</li>
-</ul>
+<table style="width:100%; border-collapse:collapse; margin:16px 0;">
+    <thead>
+        <tr style="background:#f5f5f5;">
+            <th style="padding:10px 12px; text-align:left; border:1px solid #ddd;">Feature</th>
+            <th style="padding:10px 12px; text-align:left; border:1px solid #ddd;">Status</th>
+            <th style="padding:10px 12px; text-align:left; border:1px solid #ddd;">Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">AI Agent conversations</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Supported</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Full tool calling for all providers</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Knowledge Sources (RAG)</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Supported</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Automatic embedding fallback to OpenAI/Google</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">AI Server Actions / Automations</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Supported</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Configurable via AI Automation Model setting</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">AI Search (Natural Language Query)</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Supported</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Uses the agent's chat model</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Email template generation</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Supported</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Uses the default agent's model</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">AI Field Fill</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">OpenAI only</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Odoo uses the /responses endpoint, unavailable on other providers</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">File attachments in chat</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">OpenAI / Gemini only</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Requires provider-specific file handling</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Structured output (JSON schema)</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">OpenAI / Gemini only</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Requires provider-specific response format</td>
+        </tr>
+        <tr>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Web grounding</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">OpenAI / Gemini only</td>
+            <td style="padding:10px 12px; border:1px solid #ddd;">Requires provider-specific search integration</td>
+        </tr>
+    </tbody>
+</table>
 
 <hr/>
 
@@ -125,6 +251,9 @@ configuration is needed beyond providing the API key or server URL.
         <code>ai_app</code> module.</li>
     <li><strong>At least one API key</strong> for any of the three
         providers, or a reachable self-hosted endpoint.</li>
+    <li><strong>For Knowledge Sources:</strong> an additional OpenAI or
+        Google API key for embedding (only needed when using Claude,
+        DeepSeek, or Self-Hosted as the chat model).</li>
     <li><strong>Network egress</strong> from the Odoo server to
         <code>api.anthropic.com</code>, <code>api.deepseek.com</code>,
         or your self-hosted server.</li>
