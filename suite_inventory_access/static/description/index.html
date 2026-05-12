@@ -1,169 +1,202 @@
-<h1 style="text-align:center;">Inventory Access Control for Sales and Accounting</h1>
-<h3 style="text-align:center; font-weight:normal; color:#666;">Stock visibility and stock-move history without granting full Inventory user rights</h3>
+<h1 style="text-align:center;">Sales Stock Viewer</h1>
+<h3 style="text-align:center; font-weight:normal; color:#666;">Read-only on-hand quantities by location for sales teams, without Inventory user rights</h3>
 
-<p style="text-align:center;">
-    <img src="screenshort_quant.png"
-         alt="Stock by location view for sales reps with warehouse access control in Odoo 19"
-         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+<hr/>
+
+<p style="font-size:14px; color:#999;">
+Keywords: sales stock viewer, stock visibility for sales,
+read-only stock access, sales warehouse access, on-hand for sales,
+stock by location, sales inventory access, warehouse viewer,
+sales stock access control, read only stock view,
+sales team stock, stock viewer without inventory,
+inventory access control, sales stock report,
+stock quantity for sales, sales rep stock check,
+warehouse stock read only, stock location access
 </p>
 
 <hr/>
 
-<h2>Overview</h2>
+<h2>The Problem</h2>
 <p>
-    Native Odoo couples inventory data visibility to the
-    <code>stock.group_stock_user</code> role, which also grants
-    access to receipts, transfers, scrap, and stocktake operations.
-    This module adds two independent permission groups that each
-    expose a read-only data surface with a dedicated menu, without
-    unlocking any of Inventory's operational screens.
+    Native Odoo couples stock data visibility to the full
+    <strong>Inventory User</strong> role. A sales rep who only
+    needs to check on-hand quantities must be granted access to
+    receipts, transfers, scrap, stocktake, and all other inventory
+    operations. There is no way to give "read-only stock" access
+    separately.
 </p>
-<ul>
-    <li><strong>Sales Stock Viewer</strong> &mdash; read-only access
-        to current on-hand quantities by location.</li>
-    <li><strong>Accounting Stock History</strong> &mdash; read-only
-        access to stock-move history, with a built-in consignment
-        filter.</li>
-</ul>
 
 <hr/>
 
-<h2>Functionality</h2>
-
-<h3>Sales Stock Viewer</h3>
+<h2>What This Module Does</h2>
 <p>
-    Grants read-only access to <code>stock.quant</code>,
-    <code>stock.location</code>, <code>stock.warehouse</code>,
-    and <code>stock.lot</code>. Adds a <strong>Stock View</strong>
-    menu under the Sales app showing current on-hand quantities
-    grouped by location. The view filters to internal locations
-    with positive on-hand by default.
+    Adds a <strong>Sales Stock Viewer</strong> group that grants
+    read-only access to current on-hand quantities by location.
+    No inventory operations are unlocked &mdash; no receipts, no
+    transfers, no adjustments, no scrap.
 </p>
 <p>
-    Owner and Lot/Serial columns auto-hide when the corresponding
-    Odoo features (consignment tracking, lot tracking) are not
-    enabled. The On Hand quantity column is also added to the
-    product variants list for users in this group.
+    Pure permission layer. No new models, no new database fields,
+    no business logic changes. Safe to install and uninstall at
+    any time.
 </p>
 
-<h3>Accounting Stock History</h3>
+<hr/>
+
+<h2>How It Works</h2>
+
+<h3>1. Enable the Group</h3>
 <p>
-    Grants read-only access to <code>stock.move</code>,
-    <code>stock.move.line</code>, <code>stock.location</code>,
-    <code>stock.warehouse</code>, <code>stock.lot</code>, and
-    <code>stock.picking.type</code>. Adds a <strong>Consignment
-    Moves</strong> menu under Accounting with a read-only
-    history list.
-</p>
-<p>
-    A built-in <strong>Consignment Only</strong> filter matches
-    moves whose underlying move lines carry an owner, for reviewing
-    vendor-owned inbound and outbound flow. An Owner(s) column
-    displays the consigning vendors on each move.
+    A new <strong>Stock Visibility</strong> checkbox appears in the
+    user form under the <strong>Sales</strong> section. Check it to
+    grant the user read-only stock access.
 </p>
 
 <p style="text-align:center;">
     <img src="screenshort_setting.png"
-         alt="User form with inventory access control groups and per-user location restriction settings"
+         alt="Stock Visibility checkbox in user access rights under Sales section"
          style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
 </p>
 
-<h3>Per-user location restriction</h3>
+<p style="font-size:18px; color:#555;">
+    The Stock Visibility toggle in user settings, under the Sales
+    section. Enable it for any user who needs to check stock levels.
+</p>
+
+<h3>2. Stock View Menu</h3>
+<p>
+    A new <strong>Stock View</strong> menu appears under
+    <strong>Sales &rarr; Products</strong>. It shows a read-only list
+    of current on-hand quantities grouped by location.
+</p>
+<ul>
+    <li>Filtered to internal locations with positive on-hand by default</li>
+    <li>Search by product, location, warehouse, lot, or owner</li>
+    <li>Group by location, warehouse, product, owner, or lot</li>
+    <li>Owner and Lot/Serial columns auto-hide when those features
+        are not enabled in Odoo settings</li>
+    <li>All views are read-only &mdash; no create, edit, or delete</li>
+</ul>
+
+<p style="text-align:center;">
+    <img src="screenshort_quant.png"
+         alt="Stock by location view for sales reps showing on-hand quantities"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<p style="font-size:18px; color:#555;">
+    The Stock View menu showing on-hand quantities by location.
+    Sales users see quantities only &mdash; no cost, no valuation,
+    no operational buttons.
+</p>
+
+<h3>3. On Hand Column on Product List</h3>
+<p>
+    An <strong>On Hand</strong> quantity column is added to the
+    product variants list view for users in the Stock Viewer group.
+    This lets sales users see stock levels directly from the product
+    catalog without navigating to a separate screen.
+</p>
+
+<h3>4. Per-User Location Restriction (Optional)</h3>
 <p>
     A new <strong>Accessible Locations</strong> field on the user
     form allows administrators to scope each user to a subset of
     stock locations. When left empty, the user sees all locations
-    in their companies. Selecting a parent location automatically
-    includes all of its children.
+    in their companies.
 </p>
-<p>
-    The restriction is enforced via record rules and applies to
-    both groups. System administrators are exempt.
-</p>
+<ul>
+    <li>Selecting a parent location automatically includes all
+        child locations</li>
+    <li>Enforced via record rules (not just view-level)</li>
+    <li>System administrators are exempt</li>
+    <li>Multi-company compatible</li>
+</ul>
 
 <hr/>
 
-<h2>Permissions</h2>
+<h2>Permissions Summary</h2>
 
-<table style="width:100%; border-collapse:collapse; font-size:14px; margin:1em 0;">
-    <tr style="background:#f5f5f5;">
-        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Group</th>
-        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Location</th>
-        <th style="text-align:left; padding:8px; border:1px solid #ddd;">Access granted</th>
-    </tr>
-    <tr>
-        <td style="padding:8px; border:1px solid #ddd;">Sales Stock Viewer</td>
-        <td style="padding:8px; border:1px solid #ddd;">User form, Sales privilege</td>
-        <td style="padding:8px; border:1px solid #ddd;">Read on quant / location / warehouse / lot; Sales &rarr; Stock View menu; On Hand on product variants list</td>
-    </tr>
-    <tr>
-        <td style="padding:8px; border:1px solid #ddd;">Accounting Stock History</td>
-        <td style="padding:8px; border:1px solid #ddd;">User form, Accounting privilege</td>
-        <td style="padding:8px; border:1px solid #ddd;">Read on move / move-line / location / warehouse / lot / picking-type; Accounting &rarr; Consignment Moves menu</td>
-    </tr>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:15px;">
+    <thead>
+        <tr style="background:#f5f5f5;">
+            <th style="text-align:left;"><strong>Model</strong></th>
+            <th style="text-align:center;"><strong>Read</strong></th>
+            <th style="text-align:center;"><strong>Write</strong></th>
+            <th style="text-align:center;"><strong>Create</strong></th>
+            <th style="text-align:center;"><strong>Delete</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>stock.quant (on-hand quantities)</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+        <tr>
+            <td>stock.location</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+        <tr>
+            <td>stock.warehouse</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+        <tr>
+            <td>stock.lot</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+    </tbody>
 </table>
 
+<br/>
+
 <p>
-    Neither group implies any other group. They are assigned
-    alongside the user's existing Sales or Accounting roles.
+    The group does <strong>not</strong> imply any other group. It is
+    assigned alongside the user's existing Sales role. Users with the
+    native Inventory User role already have full stock access and do
+    not need this group.
 </p>
 
 <hr/>
 
-<h2>Scope</h2>
-
-<h3>Covered</h3>
+<h2>Technical Notes</h2>
 <ul>
-    <li>Read-only stock-quant and stock-move access via independent groups</li>
-    <li>Dedicated menus under Sales and Accounting</li>
-    <li>Per-user location restriction (Many2many on <code>res.users</code>)</li>
-    <li>Consignment-only filtering on stock moves</li>
-    <li>On Hand column on product variants list (group-restricted)</li>
-    <li>Multi-company and multi-warehouse environments</li>
-    <li>Works with lot tracking and consignment tracking on or off</li>
-</ul>
-
-<h3>Not in scope</h3>
-<ul>
-    <li>Write access to inventory data (this module is read-only by design).</li>
-    <li>Landed cost access &mdash; handled by the companion module
-        <code>suite_inventory_access_landed_cost</code>, which
-        auto-installs when <code>stock_landed_costs</code> is present.</li>
-    <li>Per-department or per-team location grants (restriction is per-user only).</li>
+    <li><strong>Pure permission layer</strong> &mdash; adds one group,
+        four ACL lines, two record rules, one computed column, and
+        dedicated read-only views. No Python business logic.</li>
+    <li><strong>Safe to uninstall</strong> &mdash; removing the module
+        reverts all permissions and menus instantly.</li>
+    <li><strong>No performance impact</strong> &mdash; group membership
+        and record rules are standard Odoo security mechanisms.</li>
+    <li><strong>Multi-company compatible</strong> &mdash; record rules
+        respect the user's company scope.</li>
+    <li><strong>Dependencies:</strong> <code>stock</code>,
+        <code>sales_team</code> (both native Odoo modules).</li>
+    <li><strong>Compatibility:</strong> Odoo 19.0 Community and Enterprise.</li>
 </ul>
 
 <hr/>
 
-<h2>Companion module</h2>
-<p>
-    <strong>Inventory Access &mdash; Landed Cost (Bridge)</strong>
-    (<code>suite_inventory_access_landed_cost</code>) auto-installs
-    when both this module and <code>stock_landed_costs</code> are
-    present. It adds landed cost RWCD access and an Accounting menu
-    for the Stock History group. Available separately on the Apps
-    Store.
-</p>
-
-<hr/>
-
-<h2>Requirements</h2>
-<ul>
-    <li><strong>Odoo 19.0</strong> (Community or Enterprise).</li>
-    <li>Depends on: <code>stock</code>, <code>sales_team</code>,
-        <code>account</code>.</li>
-</ul>
-
-<hr/>
-
-<h2>License &amp; support</h2>
+<h2>License &amp; Support</h2>
 <p>
     Released under the <strong>GNU Lesser General Public License v3</strong>
     (LGPL-3.0-or-later). The full license text is included in the
     <code>LICENSE</code> file shipped with the module.
 </p>
 <p>
-    Maintained by <strong>SuiteState</strong>. For questions, bug
-    reports, or feature requests, visit
+    Maintained by <strong>SuiteState</strong> (ElectroState FZCO).
+    For questions, bug reports, or feature requests, visit
     <a href="https://suitestate.com">suitestate.com</a> or contact
     <code>hello@suitestate.com</code>.
 </p>

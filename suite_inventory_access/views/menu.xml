@@ -13,15 +13,4 @@
               action="action_suite_stock_quant_sales_viewer"
               sequence="90"/>
 
-    <!--
-        Accounting menu: "Consignment Moves" under Customers.
-        Action gated by suite_group_accounting_stock_history.
-    -->
-
-    <menuitem id="menu_suite_accounting_stock_history"
-              name="Consignment Moves"
-              parent="account.menu_finance_receivables"
-              action="action_suite_stock_move_acct_history"
-              sequence="200"/>
-
 </odoo>

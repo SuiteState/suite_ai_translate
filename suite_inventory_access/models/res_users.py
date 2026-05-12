@@ -12,7 +12,7 @@ class ResUsers(models.Model):
         string='Accessible Locations',
         help=(
             "Restricts the locations this user can see in the Sales Stock "
-            "Viewer and Accounting Stock History menus. Leave empty to "
+            "Viewer menu. Leave empty to "
             "grant access to every location reachable by the user's "
             "companies. Selecting a parent location automatically grants "
             "access to all of its child locations."
