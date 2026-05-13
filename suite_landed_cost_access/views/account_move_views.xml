@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Extend native stock_landed_costs view on account.move so that
+        the Landed Cost User group also sees the stat button, Create
+        Landed Costs button, and landed-cost-line markers on vendor
+        bills.
+
+        Native gates all of these behind stock.group_stock_manager;
+        we add our group as an OR alternative.
+    -->
+
+    <record id="suite_account_move_form_landed_cost" model="ir.ui.view">
+        <field name="name">account.move.form.suite.landed.cost.access</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="stock_landed_costs.account_view_move_form_inherited"/>
+        <field name="arch" type="xml">
+
+            <!-- Stat button wrapper in button_box -->
+            <xpath expr="//field[@name='landed_costs_ids']/parent::t" position="attributes">
+                <attribute name="groups">stock.group_stock_manager,suite_landed_cost_access.suite_group_landed_cost_user</attribute>
+            </xpath>
+
+            <!-- Create Landed Costs button wrapper -->
+            <xpath expr="//field[@name='landed_costs_visible']/parent::t" position="attributes">
+                <attribute name="groups">stock.group_stock_manager,suite_landed_cost_access.suite_group_landed_cost_user</attribute>
+            </xpath>
+
+            <!-- Invoice lines: product_type + is_landed_costs_line -->
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='product_type']" position="attributes">
+                <attribute name="groups">stock.group_stock_manager,suite_landed_cost_access.suite_group_landed_cost_user</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='is_landed_costs_line']" position="attributes">
+                <attribute name="groups">stock.group_stock_manager,suite_landed_cost_access.suite_group_landed_cost_user</attribute>
+            </xpath>
+
+            <!-- Journal items tab: product_type + is_landed_costs_line -->
+            <xpath expr="//field[@name='line_ids']//field[@name='product_type']" position="attributes">
+                <attribute name="groups">stock.group_stock_manager,suite_landed_cost_access.suite_group_landed_cost_user</attribute>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']//field[@name='is_landed_costs_line']" position="attributes">
+                <attribute name="groups">stock.group_stock_manager,suite_landed_cost_access.suite_group_landed_cost_user</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,337 @@
+<h1 style="text-align:center;">Landed Cost Access for Accountants</h1>
+<h3 style="text-align:center; font-weight:normal; color:#666;">Create and validate landed costs without Inventory Administrator rights</h3>
+
+<hr/>
+
+<p style="font-size:14px; color:#999;">
+Keywords: landed cost access, landed cost for accountants,
+landed cost permission, landed cost without inventory admin,
+freight cost allocation, customs duty allocation,
+accounting landed cost, landed cost access control,
+inventory valuation adjustment, landed cost accounting,
+stock landed cost permission, vendor bill landed cost,
+bill of lading cost, shipping cost allocation,
+import duty allocation, ancillary cost distribution,
+landed cost user group, landed cost role,
+accounting inventory access, cost allocation permission
+</p>
+
+<hr/>
+
+<h2>The Problem</h2>
+<p>
+    Native Odoo restricts landed cost management to the
+    <strong>Inventory Administrator</strong> role. Accountants who
+    need to allocate freight, customs, and other ancillary costs
+    into inventory valuation must be granted full Inventory admin
+    rights &mdash; which also unlocks Configuration, Adjustments,
+    and all inventory operational menus.
+</p>
+<p>
+    This creates a security dilemma: either give accountants too
+    much access, or force them to rely on inventory managers for
+    every landed cost adjustment.
+</p>
+
+<hr/>
+
+<h2>What This Module Does</h2>
+<p>
+    Adds a standalone <strong>Landed Cost User</strong> group that
+    grants accounting users the ability to create, validate, and
+    manage landed cost records, without unlocking any Inventory
+    operational or configuration screens.
+</p>
+<p>
+    Pure permission layer. No new models, no new database fields,
+    no business logic changes. Safe to install and uninstall at
+    any time.
+</p>
+
+<hr/>
+
+<h2>How It Works</h2>
+
+<h3>1. Enable the Group</h3>
+<p>
+    A new <strong>Landed Costs</strong> checkbox appears in the
+    user form under the <strong>Accounting</strong> section. Check
+    it to grant the user landed cost management access.
+</p>
+<p>
+    The group is independent of the Inventory permission level.
+    A user can be an Invoicing user (or Accountant) with Landed
+    Cost access, without any Inventory role at all.
+</p>
+
+<p style="text-align:center;">
+    <img src="screenshot_setting.png"
+         alt="Landed Costs checkbox in user access rights under Accounting section"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<p style="font-size:18px; color:#555;">
+    The Landed Costs toggle in user settings, under the Accounting
+    section. Enable it for any user who needs to manage landed costs.
+</p>
+
+<h3>2. Vendor Bill Integration</h3>
+<p>
+    Users in the Landed Cost User group see the same landed cost
+    controls on vendor bills that were previously visible only to
+    Inventory Administrators:
+</p>
+<ul>
+    <li><strong>Landed Costs stat button</strong> &mdash; shows the
+        count of related landed cost records on the bill</li>
+    <li><strong>Create Landed Costs button</strong> &mdash; one-click
+        creation of a landed cost record from marked bill lines</li>
+    <li><strong>Is Landed Cost checkbox</strong> &mdash; mark
+        individual bill lines as landed cost items (freight,
+        customs, handling, etc.)</li>
+</ul>
+
+<p style="text-align:center;">
+    <img src="screenshot_bill.png"
+         alt="Vendor bill with Create Landed Costs button and Is Landed Cost checkbox visible to accountants"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<p style="font-size:18px; color:#555;">
+    Vendor bill showing the Create Landed Costs button and
+    Is Landed Cost checkbox &mdash; now visible to the Landed
+    Cost User group, not just Inventory Administrators.
+</p>
+
+<h3>3. Landed Costs Menu</h3>
+<p>
+    A new <strong>Landed Costs</strong> menu appears under
+    <strong>Accounting &rarr; Vendors</strong>. It shows the same
+    native list and form views used by Inventory Administrators,
+    giving the accountant full lifecycle management:
+</p>
+<ul>
+    <li>Create new landed cost records</li>
+    <li>Select receipts (pickings) to allocate costs to</li>
+    <li>Configure cost lines (product, amount, split method)</li>
+    <li>Compute cost allocation across products</li>
+    <li>Validate to post accounting entries and update valuation</li>
+    <li>Cancel if needed</li>
+</ul>
+
+<p style="text-align:center;">
+    <img src="screenshot_land_cost.png"
+         alt="Landed cost form view accessible from Accounting menu"
+         style="width:100%; max-width:1920px; height:auto; border-radius:4px;"/>
+</p>
+
+<p style="font-size:18px; color:#555;">
+    Landed cost form view, accessible directly from the
+    Accounting &rarr; Vendors menu. Full lifecycle management
+    without Inventory Administrator rights.
+</p>
+
+<h3>4. Split Methods</h3>
+<p>
+    All five native allocation methods are available:
+</p>
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; max-width:600px; border-collapse:collapse; font-size:15px;">
+    <thead>
+        <tr style="background:#f5f5f5;">
+            <th style="text-align:left;"><strong>Method</strong></th>
+            <th style="text-align:left;"><strong>Distributes by</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Equal</td><td>Equal share per product line</td></tr>
+        <tr><td>By Quantity</td><td>Received quantity</td></tr>
+        <tr><td>By Current Cost</td><td>Current product cost (standard_price)</td></tr>
+        <tr><td>By Weight</td><td>Product weight</td></tr>
+        <tr><td>By Volume</td><td>Product volume</td></tr>
+    </tbody>
+</table>
+
+<hr/>
+
+<h2>Permissions Granted</h2>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:15px;">
+    <thead>
+        <tr style="background:#f5f5f5;">
+            <th style="text-align:left;"><strong>Model</strong></th>
+            <th style="text-align:center;"><strong>Read</strong></th>
+            <th style="text-align:center;"><strong>Write</strong></th>
+            <th style="text-align:center;"><strong>Create</strong></th>
+            <th style="text-align:center;"><strong>Delete</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>stock.landed.cost</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+        </tr>
+        <tr>
+            <td>stock.landed.cost.lines</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+        </tr>
+        <tr>
+            <td>stock.valuation.adjustment.lines</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes</td>
+        </tr>
+        <tr>
+            <td>stock.picking (receipts)</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+        <tr>
+            <td>stock.move</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes*</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+        <tr>
+            <td>stock.move.line</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+        <tr>
+            <td>stock.location / warehouse</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+        <tr>
+            <td>stock.lot</td>
+            <td style="text-align:center;">Yes</td>
+            <td style="text-align:center;">Yes*</td>
+            <td style="text-align:center;">No</td>
+            <td style="text-align:center;">No</td>
+        </tr>
+    </tbody>
+</table>
+
+<p style="font-size:13px; color:#888;">
+    * Write on stock.move and stock.lot is required because native
+    Odoo updates move valuation and lot average cost during landed
+    cost validation without using sudo(). Without write access,
+    validation would fail with an AccessError.
+</p>
+
+<hr/>
+
+<h2>What Is NOT Granted</h2>
+<p>
+    The Landed Cost User group does <strong>not</strong> unlock:
+</p>
+<ul>
+    <li>Inventory Operations menu (receipts, transfers, deliveries)</li>
+    <li>Inventory Configuration menu</li>
+    <li>Inventory Adjustments</li>
+    <li>Inventory Reporting</li>
+    <li>Any inventory create/delete operations</li>
+</ul>
+<p>
+    The group is purely additive. It does not imply any Inventory
+    role and does not conflict with any existing permissions.
+</p>
+
+<hr/>
+
+<h2>Typical Setup</h2>
+
+<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse; font-size:15px;">
+    <thead>
+        <tr style="background:#f5f5f5;">
+            <th style="text-align:left;"><strong>User Role</strong></th>
+            <th style="text-align:left;"><strong>Accounting Level</strong></th>
+            <th style="text-align:left;"><strong>Landed Cost</strong></th>
+            <th style="text-align:left;"><strong>Result</strong></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Accountant</td>
+            <td>Accountant</td>
+            <td>Yes</td>
+            <td>Full landed cost lifecycle from vendor bills</td>
+        </tr>
+        <tr>
+            <td>AP Clerk</td>
+            <td>Invoicing</td>
+            <td>Yes</td>
+            <td>Create and validate landed costs on bills</td>
+        </tr>
+        <tr>
+            <td>Inventory Admin</td>
+            <td>Any</td>
+            <td>Not needed</td>
+            <td>Already has full access via native Inventory Administrator</td>
+        </tr>
+        <tr>
+            <td>Sales User</td>
+            <td>None</td>
+            <td>No</td>
+            <td>No landed cost visibility (unchanged)</td>
+        </tr>
+    </tbody>
+</table>
+
+<hr/>
+
+<h2>Technical Notes</h2>
+<ul>
+    <li><strong>Pure permission layer</strong> &mdash; adds one group,
+        ten ACL lines, and one view override. No new models, no Python
+        code, no business logic changes.</li>
+    <li><strong>Implies Invoicing group</strong> &mdash; enabling the
+        Landed Cost User checkbox automatically grants Invoicing
+        rights, ensuring journal entry creation works during
+        validation.</li>
+    <li><strong>Safe to uninstall</strong> &mdash; removing the module
+        reverts all permissions and menus instantly.</li>
+    <li><strong>No performance impact</strong> &mdash; group membership
+        and ACLs are standard Odoo security mechanisms.</li>
+    <li><strong>Multi-company compatible</strong> &mdash; native
+        multi-company rule on stock.landed.cost applies to the new
+        group automatically.</li>
+    <li><strong>No conflict with Inventory roles</strong> &mdash;
+        Odoo merges ACLs with OR logic. Users who also have
+        Inventory User or Administrator retain their full access.</li>
+    <li><strong>Standalone module</strong> &mdash; no dependency on
+        any other SuiteState module. Works with any combination of
+        native and third-party modules.</li>
+    <li><strong>Dependencies:</strong> <code>stock_landed_costs</code>
+        (native Odoo module, installed when Landed Costs is enabled
+        in Inventory settings).</li>
+    <li><strong>Compatibility:</strong> Odoo 19.0 Community and Enterprise.</li>
+</ul>
+
+<hr/>
+
+<h2>License &amp; Support</h2>
+<p>
+    Released under the <strong>GNU Lesser General Public License v3</strong>
+    (LGPL-3.0-or-later). The full license text is included in the
+    <code>LICENSE</code> file shipped with the module.
+</p>
+<p>
+    Maintained by <strong>SuiteState</strong> (ElectroState FZCO).
+    For questions, bug reports, or feature requests, visit
+    <a href="https://suitestate.com">suitestate.com</a> or contact
+    <code>hello@suitestate.com</code>.
+</p>

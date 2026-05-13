@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+suite_lca_landed_cost,suite.lca.landed.cost.full,stock_landed_costs.model_stock_landed_cost,suite_landed_cost_access.suite_group_landed_cost_user,1,1,1,1
+suite_lca_landed_cost_lines,suite.lca.landed.cost.lines.full,stock_landed_costs.model_stock_landed_cost_lines,suite_landed_cost_access.suite_group_landed_cost_user,1,1,1,1
+suite_lca_valuation_adjustment_lines,suite.lca.valuation.adjustment.lines.full,stock_landed_costs.model_stock_valuation_adjustment_lines,suite_landed_cost_access.suite_group_landed_cost_user,1,1,1,1
+suite_lca_stock_picking,suite.lca.picking.read,stock.model_stock_picking,suite_landed_cost_access.suite_group_landed_cost_user,1,0,0,0
+suite_lca_stock_picking_type,suite.lca.picking.type.read,stock.model_stock_picking_type,suite_landed_cost_access.suite_group_landed_cost_user,1,0,0,0
+suite_lca_stock_move,suite.lca.move.readwrite,stock.model_stock_move,suite_landed_cost_access.suite_group_landed_cost_user,1,1,0,0
+suite_lca_stock_move_line,suite.lca.move.line.read,stock.model_stock_move_line,suite_landed_cost_access.suite_group_landed_cost_user,1,0,0,0
+suite_lca_stock_location,suite.lca.location.read,stock.model_stock_location,suite_landed_cost_access.suite_group_landed_cost_user,1,0,0,0
+suite_lca_stock_warehouse,suite.lca.warehouse.read,stock.model_stock_warehouse,suite_landed_cost_access.suite_group_landed_cost_user,1,0,0,0
+suite_lca_stock_lot,suite.lca.lot.readwrite,stock.model_stock_lot,suite_landed_cost_access.suite_group_landed_cost_user,1,1,0,0

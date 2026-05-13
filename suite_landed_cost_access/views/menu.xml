@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Landed Costs menu under Accounting -> Vendors.
+        Reuses native stock.landed.cost views; only adds an
+        entry point for the Landed Cost User group.
+    -->
+
+    <record id="action_suite_landed_cost"
+            model="ir.actions.act_window">
+        <field name="name">Landed Costs</field>
+        <field name="res_model">stock.landed.cost</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="group_ids"
+               eval="[(4, ref('suite_group_landed_cost_user'))]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No landed cost adjustments yet.
+            </p>
+            <p>
+                Create a landed cost record to allocate freight,
+                customs, handling and other ancillary costs into
+                inventory valuation.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_suite_landed_cost"
+              name="Landed Costs"
+              parent="account.menu_finance_payables"
+              action="action_suite_landed_cost"
+              sequence="999"/>
+
+</odoo>
