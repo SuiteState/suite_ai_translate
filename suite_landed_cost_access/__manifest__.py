@@ -1,5 +1,5 @@
 {
-    'name': 'Landed Cost Access for Accountants',
+    'name': 'Landed Costs for Accountants',
     'version': '19.0.1.0.0',
     'category': 'Inventory/Inventory',
     'summary': (
@@ -18,8 +18,8 @@ stock landed cost permission, vendor bill landed cost,
 bill of lading cost, shipping cost allocation,
 import duty allocation, ancillary cost distribution
 
-Landed Cost Access for Accountants
-===================================
+Landed Costs for Accountants
+============================
 
 Native Odoo restricts landed cost management to the Inventory
 Administrator role. Accountants who need to allocate freight,

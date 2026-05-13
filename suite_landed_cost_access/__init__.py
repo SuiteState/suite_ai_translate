@@ -1,1 +1,1 @@
-# Landed Cost Access for Accountants — no Python models needed.
+# Landed Costs for Accountants — no Python models needed.
